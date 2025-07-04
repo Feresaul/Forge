@@ -1,7 +1,7 @@
 {
     "name": "@nuc-lib/forge",
     "version": "1.0.0",
-    "description": "",
+    "description": "A lightweight validation library for TypeScript, designed to create blueprints with ease.",
     "author": "Esaúl Franco",
     "license": "MIT",
     "type": "module",
@@ -12,7 +12,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/Feresaul/forge.git"
+        "url": "git+https://github.com/Feresaul/Forge.git"
     },
     "keywords": [
         "@nuc-lib",
@@ -29,9 +29,9 @@
         "./package.json": "./package.json"
     },
     "bugs": {
-        "url": "https://github.com/Feresaul/forge/issues"
+        "url": "https://github.com/Feresaul/Forge/issues"
     },
-    "homepage": "https://github.com/Feresaul/forge#readme",
+    "homepage": "https://github.com/Feresaul/Forge#readme",
     "devDependencies": {
         "@eslint/js": "^9.26.0",
         "@types/node": "^22.15.15",
