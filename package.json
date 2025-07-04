@@ -1,0 +1,47 @@
+{
+    "name": "@nuc-lib/forge",
+    "version": "1.0.0",
+    "description": "",
+    "author": "Esaúl Franco",
+    "license": "MIT",
+    "type": "module",
+    "scripts": {
+        "lint": "eslint . --ext .ts",
+        "format": "prettier --write .",
+        "test": "vitest"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Feresaul/forge.git"
+    },
+    "keywords": [
+        "@nuc-lib",
+        "forge",
+        "validation",
+        "typescript",
+        "blueprint",
+        "schema"
+    ],
+    "exports": {
+        ".": {
+            "import": "./lib/index.ts"
+        },
+        "./package.json": "./package.json"
+    },
+    "bugs": {
+        "url": "https://github.com/Feresaul/forge/issues"
+    },
+    "homepage": "https://github.com/Feresaul/forge#readme",
+    "devDependencies": {
+        "@eslint/js": "^9.26.0",
+        "@types/node": "^22.15.15",
+        "prettier": "^3.6.2",
+        "rimraf": "^6.0.1",
+        "ts-node": "^10.9.2",
+        "typescript-eslint": "^8.32.0",
+        "vitest": "^3.1.3"
+    },
+    "peerDependencies": {
+        "typescript": "^5.0.0"
+    }
+}
