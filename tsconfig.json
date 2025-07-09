@@ -5,7 +5,7 @@
         "module": "ESNext",
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
-        "noEmit": true,
+        "noEmit": false,
         "moduleResolution": "bundler",
         // Best practices
         "strict": true,
@@ -14,7 +14,10 @@
         // Some stricter flags (disabled by default)
         "noUnusedLocals": false,
         "noUnusedParameters": false,
-        "noPropertyAccessFromIndexSignature": false
+        "noPropertyAccessFromIndexSignature": false,
+        "outDir": "dist",
+        "declaration": true,
+        "declarationDir": "dist/types"
     },
-    "exclude": ["lib/tests"]
+    "include": ["lib/**/*", "tests/**/*"]
 }
