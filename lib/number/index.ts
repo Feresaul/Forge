@@ -3,8 +3,13 @@ import { forgeValidations, verifyChain, verifyType } from '../forgeFunctions';
 import type { ValidationFunction, VerificationResult } from '../forgeTypes';
 import type { NumberForgeOptions, NumberMethods } from './number.types';
 
+/**
+ * Creates a number validation chain.
+ * @param errorMessage - The error message to return if validation fails.
+ * @returns A new NumberMethods instance with the specified error message.
+ */
 export const number = (errorMessage?: string) => {
-    const forgeType = (value: unknown) =>
+    const forgeType = <T = unknown>(value: T): VerificationResult<T> =>
         verifyType({
             value,
             typeStr: 'number',
@@ -19,7 +24,7 @@ export const number = (errorMessage?: string) => {
         const { validations, addToForge } =
             forgeValidations(initialValidations);
 
-        const forge = (value: unknown): VerificationResult => {
+        const forge = <T = unknown>(value: T): VerificationResult<T> => {
             return verifyChain({ value, validations }, forgeOptions);
         };
 
@@ -38,7 +43,7 @@ export const number = (errorMessage?: string) => {
         };
 
         const check = (
-            fn: (value: unknown) => boolean,
+            fn: <T = unknown>(value: T) => boolean,
             errorMessage?: string
         ) => {
             addToForge({ fn, errorMessage });
@@ -47,7 +52,12 @@ export const number = (errorMessage?: string) => {
 
         const min = (min: number, errorMessage?: string) => {
             addToForge({
-                fn: (value: number) => value >= min,
+                fn: <T = unknown>(value: T) => {
+                    if (typeof value === 'number') {
+                        return value >= min;
+                    }
+                    return false;
+                },
                 errorMessage,
                 caller: 'min'
             });
@@ -59,7 +69,12 @@ export const number = (errorMessage?: string) => {
 
         const max = (max: number, errorMessage?: string) => {
             addToForge({
-                fn: (value: number) => value <= max,
+                fn: <T = unknown>(value: T) => {
+                    if (typeof value === 'number') {
+                        return value <= max;
+                    }
+                    return false;
+                },
                 errorMessage,
                 caller: 'max'
             });

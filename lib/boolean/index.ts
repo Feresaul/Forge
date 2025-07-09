@@ -7,8 +7,13 @@ import type {
 } from '../forgeTypes';
 import type { BooleanMethods } from './boolean.types';
 
+/**
+ * Creates a boolean validation chain.
+ * @param errorMessage - The error message to return if validation fails.
+ * @returns A new BooleanMethods instance with the specified error message.
+ */
 export const boolean = (errorMessage?: string) => {
-    const forgeType = (value: unknown) =>
+    const forgeType = <T = unknown>(value: T): VerificationResult<T> =>
         verifyType({
             value,
             typeStr: 'boolean',
@@ -23,8 +28,8 @@ export const boolean = (errorMessage?: string) => {
         const { validations, addToForge } =
             forgeValidations(initialValidations);
 
-        const forge = (value: unknown): VerificationResult => {
-            return verifyChain({ value, validations }, forgeOptions);
+        const forge = <T = unknown>(value: T): VerificationResult<T> => {
+            return verifyChain<T>({ value, validations }, forgeOptions);
         };
 
         const optional = () => {
@@ -42,7 +47,7 @@ export const boolean = (errorMessage?: string) => {
         };
 
         const check = (
-            fn: (value: unknown) => boolean,
+            fn: <T = unknown>(value: T) => boolean,
             errorMessage?: string
         ) => {
             addToForge({ fn, errorMessage });

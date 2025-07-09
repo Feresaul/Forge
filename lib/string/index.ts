@@ -3,8 +3,13 @@ import { forgeValidations, verifyChain, verifyType } from '../forgeFunctions';
 import type { ValidationFunction, VerificationResult } from '../forgeTypes';
 import type { StringForgeOptions, StringMethods } from './string.types';
 
+/**
+ * Creates a string validation chain.
+ * @param errorMessage - The error message to return if validation fails.
+ * @returns A new StringMethods instance with the specified error message.
+ */
 export const string = (errorMessage?: string) => {
-    const forgeType = (value: unknown) =>
+    const forgeType = <T = unknown>(value: T): VerificationResult<T> =>
         verifyType({
             value,
             typeStr: 'string',
@@ -19,7 +24,7 @@ export const string = (errorMessage?: string) => {
         const { validations, addToForge } =
             forgeValidations(initialValidations);
 
-        const forge = (value: unknown): VerificationResult => {
+        const forge = <T = unknown>(value: T): VerificationResult<T> => {
             return verifyChain({ value, validations }, forgeOptions);
         };
 
@@ -38,7 +43,7 @@ export const string = (errorMessage?: string) => {
         };
 
         const check = (
-            fn: (value: unknown) => boolean,
+            fn: <T = unknown>(value: T) => boolean,
             errorMessage?: string
         ) => {
             addToForge({ fn, errorMessage });
@@ -47,7 +52,12 @@ export const string = (errorMessage?: string) => {
 
         const minLength = (minLength: number, errorMessage?: string) => {
             addToForge({
-                fn: (value: string) => value.length >= minLength,
+                fn: <T = unknown>(value: T) => {
+                    if (typeof value === 'string') {
+                        return value.length >= minLength;
+                    }
+                    return false;
+                },
                 errorMessage,
                 caller: 'minLength'
             });
@@ -59,7 +69,12 @@ export const string = (errorMessage?: string) => {
 
         const maxLength = (maxLength: number, errorMessage?: string) => {
             addToForge({
-                fn: (value: string) => value.length <= maxLength,
+                fn: <T = unknown>(value: T) => {
+                    if (typeof value === 'string') {
+                        return value.length <= maxLength;
+                    }
+                    return false;
+                },
                 errorMessage,
                 caller: 'maxLength'
             });
@@ -71,23 +86,16 @@ export const string = (errorMessage?: string) => {
 
         const regExp = (regex: RegExp, errorMessage?: string) => {
             addToForge({
-                fn: (value: string) => regex.test(value),
+                fn: <T = unknown>(value: T) => {
+                    if (typeof value === 'string') {
+                        return regex.test(value);
+                    }
+                    return false;
+                },
                 errorMessage,
                 caller: 'regExp'
             });
             return createMethods(validations.slice(), forgeOptions);
-        };
-
-        const email = (errorMessage?: string) => {
-            addToForge({
-                fn: (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
-                errorMessage,
-                caller: 'email'
-            });
-            return createMethods(validations.slice(), {
-                ...forgeOptions,
-                hasEmail: true
-            });
         };
 
         const newMethods: Record<string, unknown> = {
@@ -109,9 +117,6 @@ export const string = (errorMessage?: string) => {
         if (!forgeOptions.hasMaxLength) {
             newMethods.maxLength = maxLength;
         }
-        if (!forgeOptions.hasEmail) {
-            newMethods.email = email;
-        }
 
         return newMethods as StringMethods;
     };
@@ -120,7 +125,6 @@ export const string = (errorMessage?: string) => {
         optional: false,
         nullable: false,
         hasMinLength: false,
-        hasMaxLength: false,
-        hasEmail: false
+        hasMaxLength: false
     });
 };

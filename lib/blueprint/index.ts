@@ -3,15 +3,21 @@ import { forgeValidations, verifyChain } from '../forgeFunctions';
 import type {
     BaseForgeObject,
     BaseForgeOptions,
+    UnsuccessfulVerificationResult,
     ValidationFunction,
     VerificationResult
 } from '../forgeTypes';
 import type { BlueprintMethods } from './blueprint.types';
 
+/**
+ * Creates a blueprint(object) validation chain.
+ * @param model - The model to use for validation.
+ * @returns A new BlueprintMethods instance for the specified model.
+ */
 export const blueprint = <TBlueprint extends BaseForgeObject>(
     model: TBlueprint
 ) => {
-    const forgeType = (value: unknown): VerificationResult => {
+    const forgeType = <T = unknown>(value: T): VerificationResult<T> => {
         if (typeof value !== 'object' || Array.isArray(value) || !value) {
             return {
                 success: false,
@@ -19,7 +25,7 @@ export const blueprint = <TBlueprint extends BaseForgeObject>(
                 method: 'blueprint'
             };
         }
-        return { success: true };
+        return { success: true, value };
     };
 
     const createMethods = (
@@ -29,33 +35,34 @@ export const blueprint = <TBlueprint extends BaseForgeObject>(
         const { validations, addToForge } =
             forgeValidations(initialValidations);
 
-        const forge = (value: unknown): VerificationResult => {
+        const forge = <T = unknown>(value: T): VerificationResult<T> => {
             if (
                 (forgeOptions.optional && value === undefined) ||
                 (forgeOptions.nullable && value === null)
             ) {
-                return { success: true };
+                return { success: true, value };
             }
 
-            let issues: VerificationResult[] = [];
+            let issues: UnsuccessfulVerificationResult[] = [];
 
             // Verify all properties in the model
             Object.entries(model).forEach(([key, forgeElement]) => {
                 const res = forgeElement.forge(
                     value ? (value as Record<string, unknown>)[key] : undefined
                 );
-                if (!res.success) {
-                    if (res.issues) {
-                        // If issues are present, adjust the path to include nested keys
-                        const adjustedIssues = res.issues.map((issue) => ({
-                            ...issue,
-                            path: [key, ...(issue.path || [])]
-                        }));
-                        issues = issues.concat(adjustedIssues);
-                    } else {
-                        // Push the issue with the key of the object
-                        issues.push({ ...res, path: [key] });
-                    }
+                if (res.success) {
+                    return;
+                }
+                if (res.issues) {
+                    // If issues are present, adjust the path to include nested keys
+                    const adjustedIssues = res.issues.map((issue) => ({
+                        ...issue,
+                        path: [key, ...(issue.path || [])]
+                    }));
+                    issues = issues.concat(adjustedIssues);
+                } else {
+                    // Push the issue with the key of the object
+                    issues.push({ ...res, path: [key] });
                 }
             });
 
@@ -68,7 +75,7 @@ export const blueprint = <TBlueprint extends BaseForgeObject>(
             if (issues.length > 0) {
                 return { success: false, code: 'validation_error', issues };
             }
-            return { success: true };
+            return { success: true, value };
         };
 
         const optional = () => {
@@ -86,7 +93,7 @@ export const blueprint = <TBlueprint extends BaseForgeObject>(
         };
 
         const check = (
-            fn: (value: unknown) => boolean,
+            fn: <T = unknown>(value: T) => boolean,
             errorMessage?: string
         ) => {
             addToForge({ fn, errorMessage });
