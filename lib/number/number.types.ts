@@ -4,12 +4,11 @@ import type {
     BaseForgeOptions
 } from '../forgeTypes';
 
-type BooleanForgeOptions = { hasMin: boolean; hasMax: boolean };
+type ForgeOptions = { hasMin: boolean; hasMax: boolean };
 
-export type NumberForgeOptions = BaseForgeOptions & BooleanForgeOptions;
+export type NumberForgeOptions = BaseForgeOptions & ForgeOptions;
 
-type ForgeMethodsConfig<T = unknown> = BaseForgeMethodsConfig<T> &
-    BooleanForgeOptions;
+type ForgeMethodsConfig<T = unknown> = BaseForgeMethodsConfig<T> & ForgeOptions;
 
 type ForgeMethods<Config extends ForgeMethodsConfig> = BaseForgeMethods<
     Config['type']
@@ -21,7 +20,7 @@ type ForgeMethods<Config extends ForgeMethodsConfig> = BaseForgeMethods<
      * @returns A new ForgeMethods instance with the validation applied.
      */
     check: (
-        fn: (value: Config['type']) => boolean,
+        fn: (value: Config['type']) => boolean | Promise<boolean>,
         errorMessage?: string
     ) => ForgeMethods<Config>;
 } & (Config['isOptional'] extends true

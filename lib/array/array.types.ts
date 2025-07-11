@@ -1,6 +1,16 @@
-import type { BaseForgeMethods, BaseForgeMethodsConfig } from '../forgeTypes';
+import type {
+    BaseForgeMethods,
+    BaseForgeMethodsConfig,
+    BaseForgeOptions
+} from '../forgeTypes';
 
-type ForgeMethods<Config extends BaseForgeMethodsConfig> = BaseForgeMethods<
+type ForgeOptions = { hasMinLength: boolean; hasMaxLength: boolean };
+
+export type ArrayForgeOptions = BaseForgeOptions & ForgeOptions;
+
+type ForgeMethodsConfig<T = unknown> = BaseForgeMethodsConfig<T> & ForgeOptions;
+
+type ForgeMethods<Config extends ForgeMethodsConfig> = BaseForgeMethods<
     Config['type']
 > & {
     /**
@@ -10,7 +20,7 @@ type ForgeMethods<Config extends BaseForgeMethodsConfig> = BaseForgeMethods<
      * @returns A new ForgeMethods instance with the validation applied.
      */
     check: (
-        fn: (value: Config['type']) => boolean,
+        fn: (value: Config['type']) => boolean | Promise<boolean>,
         errorMessage?: string
     ) => ForgeMethods<Config>;
 } & (Config['isOptional'] extends true
@@ -24,6 +34,8 @@ type ForgeMethods<Config extends BaseForgeMethodsConfig> = BaseForgeMethods<
                   type: Config['type'] | undefined;
                   isOptional: true;
                   isNullable: Config['isNullable'];
+                  hasMinLength: Config['hasMinLength'];
+                  hasMaxLength: Config['hasMaxLength'];
               }>;
           }) &
     (Config['isNullable'] extends true
@@ -37,9 +49,51 @@ type ForgeMethods<Config extends BaseForgeMethodsConfig> = BaseForgeMethods<
                   type: Config['type'] | null;
                   isOptional: Config['isOptional'];
                   isNullable: true;
+                  hasMinLength: Config['hasMinLength'];
+                  hasMaxLength: Config['hasMaxLength'];
+              }>;
+          }) &
+    (Config['hasMinLength'] extends true
+        ? object
+        : {
+              /**
+               * Checks if the value has a minimum length.
+               * @param minLength - The minimum length to enforce.
+               * @param errorMessage - The error message to return if validation fails.
+               * @returns A new ForgeMethods instance with the validation applied.
+               */
+              minLength: (
+                  minLength: number,
+                  errorMessage?: string
+              ) => ForgeMethods<{
+                  type: Config['type'];
+                  isOptional: Config['isOptional'];
+                  isNullable: Config['isNullable'];
+                  hasMinLength: true;
+                  hasMaxLength: Config['hasMaxLength'];
+              }>;
+          }) &
+    (Config['hasMaxLength'] extends true
+        ? object
+        : {
+              /**
+               * Checks if the value has a maximum length.
+               * @param maxLength - The maximum length to enforce.
+               * @param errorMessage - The error message to return if validation fails.
+               * @returns A new ForgeMethods instance with the validation applied.
+               */
+              maxLength: (
+                  maxLength: number,
+                  errorMessage?: string
+              ) => ForgeMethods<{
+                  type: Config['type'];
+                  isOptional: Config['isOptional'];
+                  isNullable: Config['isNullable'];
+                  hasMinLength: Config['hasMinLength'];
+                  hasMaxLength: true;
               }>;
           });
 
 export type ArrayMethods<ForgeType> = ForgeMethods<
-    BaseForgeMethodsConfig<ForgeType[]>
+    ForgeMethodsConfig<ForgeType[]>
 >;

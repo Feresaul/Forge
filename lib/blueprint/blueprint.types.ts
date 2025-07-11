@@ -19,7 +19,9 @@ type ForgeMethods<Config extends BaseForgeMethodsConfig> = BaseForgeMethods<
      * @returns A new ForgeMethods instance with the validation applied.
      */
     check: (
-        fn: (value: BlueprintValues<Config['type']>) => boolean,
+        fn: (
+            value: BlueprintValues<Config['type']>
+        ) => boolean | Promise<boolean>,
         errorMessage?: string
     ) => ForgeMethods<Config>;
 } & (Config['isOptional'] extends true

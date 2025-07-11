@@ -1,6 +1,6 @@
-import { forgeValidations, verifyChain, verifyType } from '../forgeFunctions';
+import { forgeMethods, verifyChain, verifyChainAsync } from '../forgeFunctions';
 
-import type { ValidationFunction, VerificationResult } from '../forgeTypes';
+import type { ForgeMethod, VerificationResult } from '../forgeTypes';
 import type { StringForgeOptions, StringMethods } from './string.types';
 
 /**
@@ -9,45 +9,39 @@ import type { StringForgeOptions, StringMethods } from './string.types';
  * @returns A new StringMethods instance with the specified error message.
  */
 export const string = (errorMessage?: string) => {
-    const forgeType = <T = unknown>(value: T): VerificationResult<T> =>
-        verifyType({
-            value,
-            typeStr: 'string',
-            errorMessage,
-            caller: 'string'
-        });
+    const forgeType = <T = unknown>(value: T): boolean =>
+        typeof value === 'string';
 
     const createMethods = (
-        initialValidations: ValidationFunction[],
+        initialMethods: ForgeMethod[],
         forgeOptions: StringForgeOptions
     ) => {
-        const { validations, addToForge } =
-            forgeValidations(initialValidations);
+        const { methods, addToForge } = forgeMethods(initialMethods);
 
         const forge = <T = unknown>(value: T): VerificationResult<T> => {
-            return verifyChain({ value, validations }, forgeOptions);
+            return verifyChain({ value, methods }, forgeOptions);
+        };
+
+        const forgeAsync = <T = unknown>(
+            value: T
+        ): Promise<VerificationResult<T>> => {
+            return verifyChainAsync({ value, methods }, forgeOptions);
         };
 
         const optional = () => {
-            return createMethods(validations.slice(), {
-                ...forgeOptions,
-                optional: true
-            });
+            return createMethods(methods, { ...forgeOptions, optional: true });
         };
 
         const nullable = () => {
-            return createMethods(validations.slice(), {
-                ...forgeOptions,
-                nullable: true
-            });
+            return createMethods(methods, { ...forgeOptions, nullable: true });
         };
 
         const check = (
-            fn: <T = unknown>(value: T) => boolean,
+            fn: <T = unknown>(value: T) => boolean | Promise<boolean>,
             errorMessage?: string
         ) => {
-            addToForge({ fn, errorMessage });
-            return createMethods(validations.slice(), forgeOptions);
+            addToForge({ fn, caller: 'check', errorMessage });
+            return createMethods(methods, forgeOptions);
         };
 
         const minLength = (minLength: number, errorMessage?: string) => {
@@ -58,10 +52,10 @@ export const string = (errorMessage?: string) => {
                     }
                     return false;
                 },
-                errorMessage,
-                caller: 'minLength'
+                caller: 'minLength',
+                errorMessage
             });
-            return createMethods(validations.slice(), {
+            return createMethods(methods, {
                 ...forgeOptions,
                 hasMinLength: true
             });
@@ -75,10 +69,10 @@ export const string = (errorMessage?: string) => {
                     }
                     return false;
                 },
-                errorMessage,
-                caller: 'maxLength'
+                caller: 'maxLength',
+                errorMessage
             });
-            return createMethods(validations.slice(), {
+            return createMethods(methods, {
                 ...forgeOptions,
                 hasMaxLength: true
             });
@@ -92,14 +86,15 @@ export const string = (errorMessage?: string) => {
                     }
                     return false;
                 },
-                errorMessage,
-                caller: 'regExp'
+                caller: 'regExp',
+                errorMessage
             });
-            return createMethods(validations.slice(), forgeOptions);
+            return createMethods(methods, forgeOptions);
         };
 
         const newMethods: Record<string, unknown> = {
             forge,
+            forgeAsync,
             check,
             regExp,
             isOptional: forgeOptions.optional,
@@ -121,10 +116,20 @@ export const string = (errorMessage?: string) => {
         return newMethods as StringMethods;
     };
 
-    return createMethods([forgeType], {
-        optional: false,
-        nullable: false,
-        hasMinLength: false,
-        hasMaxLength: false
-    });
+    return createMethods(
+        [
+            {
+                fn: forgeType,
+                code: 'value_error',
+                caller: 'string',
+                errorMessage
+            }
+        ],
+        {
+            optional: false,
+            nullable: false,
+            hasMinLength: false,
+            hasMaxLength: false
+        }
+    );
 };

@@ -1,6 +1,6 @@
-import { forgeValidations, verifyChain, verifyType } from '../forgeFunctions';
+import { forgeMethods, verifyChain, verifyChainAsync } from '../forgeFunctions';
 
-import type { ValidationFunction, VerificationResult } from '../forgeTypes';
+import type { ForgeMethod, VerificationResult } from '../forgeTypes';
 import type { NumberForgeOptions, NumberMethods } from './number.types';
 
 /**
@@ -9,45 +9,39 @@ import type { NumberForgeOptions, NumberMethods } from './number.types';
  * @returns A new NumberMethods instance with the specified error message.
  */
 export const number = (errorMessage?: string) => {
-    const forgeType = <T = unknown>(value: T): VerificationResult<T> =>
-        verifyType({
-            value,
-            typeStr: 'number',
-            errorMessage,
-            caller: 'number'
-        });
+    const forgeType = <T = unknown>(value: T): boolean =>
+        typeof value === 'number';
 
     const createMethods = (
-        initialValidations: ValidationFunction[],
+        initialMethods: ForgeMethod[],
         forgeOptions: NumberForgeOptions
     ) => {
-        const { validations, addToForge } =
-            forgeValidations(initialValidations);
+        const { methods, addToForge } = forgeMethods(initialMethods);
 
         const forge = <T = unknown>(value: T): VerificationResult<T> => {
-            return verifyChain({ value, validations }, forgeOptions);
+            return verifyChain({ value, methods }, forgeOptions);
+        };
+
+        const forgeAsync = <T = unknown>(
+            value: T
+        ): Promise<VerificationResult<T>> => {
+            return verifyChainAsync({ value, methods }, forgeOptions);
         };
 
         const optional = () => {
-            return createMethods(validations.slice(), {
-                ...forgeOptions,
-                optional: true
-            });
+            return createMethods(methods, { ...forgeOptions, optional: true });
         };
 
         const nullable = () => {
-            return createMethods(validations.slice(), {
-                ...forgeOptions,
-                nullable: true
-            });
+            return createMethods(methods, { ...forgeOptions, nullable: true });
         };
 
         const check = (
-            fn: <T = unknown>(value: T) => boolean,
+            fn: <T = unknown>(value: T) => boolean | Promise<boolean>,
             errorMessage?: string
         ) => {
-            addToForge({ fn, errorMessage });
-            return createMethods(validations.slice(), forgeOptions);
+            addToForge({ fn, caller: 'check', errorMessage });
+            return createMethods(methods, forgeOptions);
         };
 
         const min = (min: number, errorMessage?: string) => {
@@ -58,13 +52,10 @@ export const number = (errorMessage?: string) => {
                     }
                     return false;
                 },
-                errorMessage,
-                caller: 'min'
+                caller: 'min',
+                errorMessage
             });
-            return createMethods(validations.slice(), {
-                ...forgeOptions,
-                hasMin: true
-            });
+            return createMethods(methods, { ...forgeOptions, hasMin: true });
         };
 
         const max = (max: number, errorMessage?: string) => {
@@ -75,17 +66,15 @@ export const number = (errorMessage?: string) => {
                     }
                     return false;
                 },
-                errorMessage,
-                caller: 'max'
+                caller: 'max',
+                errorMessage
             });
-            return createMethods(validations.slice(), {
-                ...forgeOptions,
-                hasMax: true
-            });
+            return createMethods(methods, { ...forgeOptions, hasMax: true });
         };
 
         const newMethods: Record<string, unknown> = {
             forge,
+            forgeAsync,
             check,
             isOptional: forgeOptions.optional,
             isNullable: forgeOptions.nullable
@@ -106,10 +95,20 @@ export const number = (errorMessage?: string) => {
         return newMethods as NumberMethods;
     };
 
-    return createMethods([forgeType], {
-        optional: false,
-        nullable: false,
-        hasMin: false,
-        hasMax: false
-    });
+    return createMethods(
+        [
+            {
+                fn: forgeType,
+                code: 'value_error',
+                caller: 'number',
+                errorMessage
+            }
+        ],
+        {
+            optional: false,
+            nullable: false,
+            hasMin: false,
+            hasMax: false
+        }
+    );
 };

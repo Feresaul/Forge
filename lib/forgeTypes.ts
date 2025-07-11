@@ -1,19 +1,23 @@
-export type ForgeIssueCode = 'type_error' | 'validation_error' | 'value_error';
+export type ForgeIssueCode =
+    | 'value_error'
+    | 'validation_error'
+    | 'async_method_error'
+    | 'unexpected_error';
 
 export type UnsuccessfulVerificationResult = {
     success: false;
-    code?: ForgeIssueCode;
+    code: ForgeIssueCode;
+    method: string;
+    errorMessage?: string;
     /**
      * The path to the value that failed verification.
      */
     path?: string[];
-    errorMessage?: string;
     /**
      * An array of issues that occurred during the verification process.
      * Each issue can provide additional context about the failure.
      */
     issues?: UnsuccessfulVerificationResult[];
-    method?: string;
     /**
      * If the value is part of an array, this indicates the index of the array element that failed verification.
      */
@@ -29,12 +33,18 @@ export type VerificationResult<T = unknown> =
 
 export type ValidationFunction = <T = unknown>(
     value: T
-) => VerificationResult<T>;
+) => boolean | Promise<boolean>;
 
-export type ForgeData<T = unknown> = {
-    value: T;
-    validations: ValidationFunction[];
+export type MutationFunction = <T = unknown>(value: T) => T | Promise<T>;
+
+export type ForgeMethod = {
+    fn: ValidationFunction | MutationFunction;
+    code?: ForgeIssueCode;
+    caller: string;
+    errorMessage?: string;
 };
+
+export type ForgeData<T = unknown> = { value: T; methods: ForgeMethod[] };
 
 export type BaseForgeOptions = {
     optional: boolean;
@@ -62,9 +72,17 @@ export type BaseForgeMethods<_Type = unknown> = {
      * @return A VerificationResult containing the forged value or an error if validation fails.
      */
     forge: <T = unknown>(value: T) => VerificationResult<T>;
+    /**
+     * Forge a value asynchronously based on the type and options defined in the chained methods.
+     * @return A VerificationResult containing the forged value or an error if validation fails.
+     */
+    forgeAsync: <T = unknown>(value: T) => Promise<VerificationResult<T>>;
 };
 
 export type BaseForgeObject = Record<
     string,
-    { forge: BaseForgeMethods['forge'] }
+    {
+        forge: BaseForgeMethods['forge'];
+        forgeAsync: BaseForgeMethods['forgeAsync'];
+    }
 >;

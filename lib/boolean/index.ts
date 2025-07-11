@@ -1,8 +1,8 @@
-import { forgeValidations, verifyChain, verifyType } from '../forgeFunctions';
+import { forgeMethods, verifyChain, verifyChainAsync } from '../forgeFunctions';
 
 import type {
     BaseForgeOptions,
-    ValidationFunction,
+    ForgeMethod,
     VerificationResult
 } from '../forgeTypes';
 import type { BooleanMethods } from './boolean.types';
@@ -13,49 +13,44 @@ import type { BooleanMethods } from './boolean.types';
  * @returns A new BooleanMethods instance with the specified error message.
  */
 export const boolean = (errorMessage?: string) => {
-    const forgeType = <T = unknown>(value: T): VerificationResult<T> =>
-        verifyType({
-            value,
-            typeStr: 'boolean',
-            errorMessage,
-            caller: 'boolean'
-        });
+    const forgeType = <T = unknown>(value: T): boolean =>
+        typeof value === 'boolean';
 
     const createMethods = (
-        initialValidations: ValidationFunction[],
+        initialMethods: ForgeMethod[],
         forgeOptions: BaseForgeOptions
     ) => {
-        const { validations, addToForge } =
-            forgeValidations(initialValidations);
+        const { methods, addToForge } = forgeMethods(initialMethods);
 
         const forge = <T = unknown>(value: T): VerificationResult<T> => {
-            return verifyChain<T>({ value, validations }, forgeOptions);
+            return verifyChain({ value, methods }, forgeOptions);
+        };
+
+        const forgeAsync = <T = unknown>(
+            value: T
+        ): Promise<VerificationResult<T>> => {
+            return verifyChainAsync({ value, methods }, forgeOptions);
         };
 
         const optional = () => {
-            return createMethods(validations.slice(), {
-                ...forgeOptions,
-                optional: true
-            });
+            return createMethods(methods, { ...forgeOptions, optional: true });
         };
 
         const nullable = () => {
-            return createMethods(validations.slice(), {
-                ...forgeOptions,
-                nullable: true
-            });
+            return createMethods(methods, { ...forgeOptions, nullable: true });
         };
 
         const check = (
-            fn: <T = unknown>(value: T) => boolean,
+            fn: <T = unknown>(value: T) => boolean | Promise<boolean>,
             errorMessage?: string
         ) => {
-            addToForge({ fn, errorMessage });
-            return createMethods(validations.slice(), forgeOptions);
+            addToForge({ fn, caller: 'check', errorMessage });
+            return createMethods(methods, forgeOptions);
         };
 
         const newMethods: Record<string, unknown> = {
             forge,
+            forgeAsync,
             check,
             isOptional: forgeOptions.optional,
             isNullable: forgeOptions.nullable
@@ -70,5 +65,15 @@ export const boolean = (errorMessage?: string) => {
         return newMethods as BooleanMethods;
     };
 
-    return createMethods([forgeType], { optional: false, nullable: false });
+    return createMethods(
+        [
+            {
+                fn: forgeType,
+                code: 'value_error',
+                caller: 'boolean',
+                errorMessage
+            }
+        ],
+        { optional: false, nullable: false }
+    );
 };
