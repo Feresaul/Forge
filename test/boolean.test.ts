@@ -38,10 +38,37 @@ describe('f.boolean', () => {
     it('should validate using custom check', () => {
         const isTrue = (value: boolean) => value === true;
         expect(
-            f.boolean().check(isTrue, 'Must be true').forge(true).success
+            f
+                .boolean()
+                .check(isTrue, { errorMessage: 'Must be true' })
+                .forge(true).success
         ).toBe(true);
         expect(
-            f.boolean().check(isTrue, 'Must be true').forge(false).success
+            f
+                .boolean()
+                .check(isTrue, { errorMessage: 'Must be true' })
+                .forge(false).success
         ).toBe(false);
+    });
+
+    it('should validate async forge', async () => {
+        const result = await f.boolean().forgeAsync(true);
+        expect(result.success).toBe(true);
+    });
+
+    it('should validate async check with forgeAsync', async () => {
+        const schema = f.boolean().check(
+            async (value) => {
+                await new Promise((resolve) => setTimeout(resolve, 400));
+                return value === true;
+            },
+            { errorMessage: 'Value must be true' }
+        );
+
+        const result = await schema.forgeAsync(true);
+        expect(result.success).toBe(true);
+
+        const invalidResult = await schema.forgeAsync(false);
+        expect(invalidResult.success).toBe(false);
     });
 });

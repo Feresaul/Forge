@@ -49,13 +49,17 @@ describe('f.array', () => {
         expect(
             f
                 .array(f.string())
-                .check(hasAtLeastOneElement, 'Must have at least one element')
+                .check(hasAtLeastOneElement, {
+                    errorMessage: 'Must have at least one element'
+                })
                 .forge(['valid']).success
         ).toBe(true);
         expect(
             f
                 .array(f.string())
-                .check(hasAtLeastOneElement, 'Must have at least one element')
+                .check(hasAtLeastOneElement, {
+                    errorMessage: 'Must have at least one element'
+                })
                 .forge([]).success
         ).toBe(false);
     });
@@ -66,5 +70,26 @@ describe('f.array', () => {
         expect(schema.forge(null).success).toBe(true);
         expect(schema.forge(['valid']).success).toBe(true);
         expect(schema.forge(42).success).toBe(false);
+    });
+
+    it('should validate async forge', async () => {
+        const result = await f.array(f.string()).forgeAsync(['valid', 'array']);
+        expect(result.success).toBe(true);
+    });
+
+    it('should validate async check with forgeAsync', async () => {
+        const schema = f.array(f.string()).check(
+            async (value) => {
+                await new Promise((resolve) => setTimeout(resolve, 400));
+                return value.length > 0;
+            },
+            { errorMessage: 'Array must not be empty' }
+        );
+
+        const result = await schema.forgeAsync(['valid', 'array']);
+        expect(result.success).toBe(true);
+
+        const emptyResult = await schema.forgeAsync([]);
+        expect(emptyResult.success).toBe(false);
     });
 });

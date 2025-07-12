@@ -63,12 +63,37 @@ describe('f.string', () => {
     it('should validate using custom check', () => {
         const isUpperCase = (value: string) => value === value.toUpperCase();
         expect(
-            f.string().check(isUpperCase, 'Must be uppercase').forge('VALID')
-                .success
+            f
+                .string()
+                .check(isUpperCase, { errorMessage: 'Must be uppercase' })
+                .forge('VALID').success
         ).toBe(true);
         expect(
-            f.string().check(isUpperCase, 'Must be uppercase').forge('invalid')
-                .success
+            f
+                .string()
+                .check(isUpperCase, { errorMessage: 'Must be uppercase' })
+                .forge('invalid').success
         ).toBe(false);
+    });
+
+    it('should validate async forge', async () => {
+        const result = await f.string().forgeAsync('valid');
+        expect(result.success).toBe(true);
+    });
+
+    it('should validate async check with forgeAsync', async () => {
+        const schema = f.string().check(
+            async (value) => {
+                await new Promise((resolve) => setTimeout(resolve, 400));
+                return value === value.toUpperCase();
+            },
+            { errorMessage: 'String must be uppercase' }
+        );
+
+        const result = await schema.forgeAsync('VALID');
+        expect(result.success).toBe(true);
+
+        const invalidResult = await schema.forgeAsync('invalid');
+        expect(invalidResult.success).toBe(false);
     });
 });

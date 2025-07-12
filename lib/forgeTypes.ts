@@ -37,12 +37,17 @@ export type ValidationFunction = <T = unknown>(
 
 export type MutationFunction = <T = unknown>(value: T) => T | Promise<T>;
 
+export type ForgeCheckConfig = {
+    errorMessage?: string;
+    loose?: boolean;
+    path?: string[];
+};
+
 export type ForgeMethod = {
     fn: ValidationFunction | MutationFunction;
     code?: ForgeIssueCode;
     caller: string;
-    errorMessage?: string;
-};
+} & ForgeCheckConfig;
 
 export type ForgeData<T = unknown> = { value: T; methods: ForgeMethod[] };
 

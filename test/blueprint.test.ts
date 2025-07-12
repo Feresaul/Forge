@@ -70,7 +70,9 @@ describe('f.blueprint', () => {
                 name: f.string(),
                 age: f.number()
             })
-            .check((value) => value.age > 18, 'Age must be greater than 18');
+            .check((value) => value.age > 18, {
+                errorMessage: 'Age must be greater than 18'
+            });
         expect(blueprint.forge({ name: 'John', age: 30 }).success).toBe(true);
         expect(blueprint.forge({ name: 'John', age: 15 }).success).toBe(false);
     });
@@ -87,5 +89,38 @@ describe('f.blueprint', () => {
         expect(schema.forge(null).success).toBe(true);
         expect(schema.forge({ name: 'John', age: 30 }).success).toBe(true);
         expect(schema.forge(42).success).toBe(false);
+    });
+
+    it('should validate async forge', async () => {
+        const blueprint = f.blueprint({
+            name: f.string(),
+            age: f.number()
+        });
+        const result = await blueprint.forgeAsync({ name: 'John', age: 30 });
+        expect(result.success).toBe(true);
+    });
+
+    it('should validate async check with forgeAsync', async () => {
+        const schema = f
+            .blueprint({
+                name: f.string(),
+                age: f.number()
+            })
+            .check(
+                async (value) => {
+                    await new Promise((resolve) => setTimeout(resolve, 400));
+                    return value.age > 18;
+                },
+                { errorMessage: 'Age must be greater than 18' }
+            );
+
+        const result = await schema.forgeAsync({ name: 'John', age: 30 });
+        expect(result.success).toBe(true);
+
+        const invalidResult = await schema.forgeAsync({
+            name: 'John',
+            age: 15
+        });
+        expect(invalidResult.success).toBe(false);
     });
 });

@@ -1,7 +1,8 @@
 import type {
     BaseForgeMethods,
     BaseForgeMethodsConfig,
-    BaseForgeOptions
+    BaseForgeOptions,
+    ForgeCheckConfig
 } from '../forgeTypes';
 
 type ForgeOptions = { hasMin: boolean; hasMax: boolean };
@@ -16,12 +17,12 @@ type ForgeMethods<Config extends ForgeMethodsConfig> = BaseForgeMethods<
     /**
      * Checks if the value passes the custom validation function.
      * @param fn - The custom validation function to apply.
-     * @param errorMessage - The error message to return if validation fails.
+     * @param config - The configuration for the check, including error message and options.
      * @returns A new ForgeMethods instance with the validation applied.
      */
     check: (
         fn: (value: Config['type']) => boolean | Promise<boolean>,
-        errorMessage?: string
+        config?: ForgeCheckConfig
     ) => ForgeMethods<Config>;
 } & (Config['isOptional'] extends true
         ? object

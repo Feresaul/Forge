@@ -16,29 +16,29 @@ export const verifyChain = <T = unknown>(
     data: ForgeData<T>,
     options: BaseForgeOptions
 ): VerificationResult<T> => {
-    let updatedValue: T = data.value;
     let lastMethodName = '';
     const issues: UnsuccessfulVerificationResult[] = [];
 
     try {
         data.methods.some((method) => {
             lastMethodName = method.caller;
-            const forgeResult = method.fn(updatedValue);
+            const forgeResult = method.fn(data.value);
 
             if (isPromise(forgeResult)) {
                 issues.push({
                     success: false,
                     code: 'async_method_error',
                     method: method.caller,
-                    errorMessage: method.errorMessage
+                    errorMessage: method.errorMessage,
+                    path: method.path
                 });
                 return true;
             }
 
             if (typeof forgeResult === 'boolean') {
                 if (
-                    (options.optional && updatedValue === undefined) ||
-                    (options.nullable && updatedValue === null)
+                    (options.optional && data.value === undefined) ||
+                    (options.nullable && data.value === null)
                 ) {
                     return true;
                 }
@@ -47,14 +47,14 @@ export const verifyChain = <T = unknown>(
                         success: false,
                         code: method.code || 'validation_error',
                         method: method.caller,
-                        errorMessage: method.errorMessage
+                        errorMessage: method.errorMessage,
+                        path: method.path
                     });
-                    return true;
+                    return !method.loose;
                 }
                 return false;
             }
 
-            updatedValue = forgeResult as T;
             return false;
         });
     } catch (error) {
@@ -67,7 +67,7 @@ export const verifyChain = <T = unknown>(
     }
 
     return issues.length === 0
-        ? { success: true, value: updatedValue }
+        ? { success: true, value: data.value }
         : { success: false, code: 'validation_error', method: '', issues };
 };
 /**
@@ -80,19 +80,18 @@ export const verifyChainAsync = async <T = unknown>(
     data: ForgeData<T>,
     options: BaseForgeOptions
 ): Promise<VerificationResult<T>> => {
-    let updatedValue: T = data.value;
     let lastMethodName = '';
     const issues: UnsuccessfulVerificationResult[] = [];
 
     try {
         for (const method of data.methods) {
             lastMethodName = method.caller;
-            const forgeResult = await method.fn(updatedValue);
+            const forgeResult = await method.fn(data.value);
 
             if (typeof forgeResult === 'boolean') {
                 if (
-                    (options.optional && updatedValue === undefined) ||
-                    (options.nullable && updatedValue === null)
+                    (options.optional && data.value === undefined) ||
+                    (options.nullable && data.value === null)
                 ) {
                     break;
                 }
@@ -101,13 +100,16 @@ export const verifyChainAsync = async <T = unknown>(
                         success: false,
                         code: method.code || 'validation_error',
                         method: method.caller,
-                        errorMessage: method.errorMessage
+                        errorMessage: method.errorMessage,
+                        path: method.path
                     });
+                    if (method.loose) {
+                        continue;
+                    } else {
+                        break;
+                    }
                 }
-                break;
             }
-
-            updatedValue = forgeResult as T;
         }
     } catch (error) {
         issues.push({
@@ -119,7 +121,7 @@ export const verifyChainAsync = async <T = unknown>(
     }
 
     return issues.length === 0
-        ? { success: true, value: updatedValue }
+        ? { success: true, value: data.value }
         : { success: false, code: 'validation_error', method: '', issues };
 };
 

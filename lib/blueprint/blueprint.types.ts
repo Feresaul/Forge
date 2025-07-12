@@ -1,4 +1,8 @@
-import type { BaseForgeMethods, BaseForgeMethodsConfig } from '../forgeTypes';
+import type {
+    BaseForgeMethods,
+    BaseForgeMethodsConfig,
+    ForgeCheckConfig
+} from '../forgeTypes';
 
 type BlueprintValues<T> = {
     [K in keyof T]: T[K] extends { model: infer M }
@@ -15,14 +19,14 @@ type ForgeMethods<Config extends BaseForgeMethodsConfig> = BaseForgeMethods<
     /**
      * Checks if the value passes the custom validation function.
      * @param fn - The custom validation function to apply.
-     * @param errorMessage - The error message to return if validation fails.
+     * @param config - The configuration for the check, including error message and options.
      * @returns A new ForgeMethods instance with the validation applied.
      */
     check: (
         fn: (
             value: BlueprintValues<Config['type']>
         ) => boolean | Promise<boolean>,
-        errorMessage?: string
+        config?: ForgeCheckConfig
     ) => ForgeMethods<Config>;
 } & (Config['isOptional'] extends true
         ? object

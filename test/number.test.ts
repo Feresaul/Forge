@@ -37,10 +37,37 @@ describe('f.number', () => {
     it('should validate using custom check', () => {
         const isPositive = (value: number) => value > 0;
         expect(
-            f.number().check(isPositive, 'Must be positive').forge(42).success
+            f
+                .number()
+                .check(isPositive, { errorMessage: 'Must be positive' })
+                .forge(42).success
         ).toBe(true);
         expect(
-            f.number().check(isPositive, 'Must be positive').forge(-1).success
+            f
+                .number()
+                .check(isPositive, { errorMessage: 'Must be positive' })
+                .forge(-1).success
         ).toBe(false);
+    });
+
+    it('should validate async forge', async () => {
+        const result = await f.number().forgeAsync(42);
+        expect(result.success).toBe(true);
+    });
+
+    it('should validate async check with forgeAsync', async () => {
+        const schema = f.number().check(
+            async (value) => {
+                await new Promise((resolve) => setTimeout(resolve, 400));
+                return value > 0;
+            },
+            { errorMessage: 'Number must be positive' }
+        );
+
+        const result = await schema.forgeAsync(42);
+        expect(result.success).toBe(true);
+
+        const invalidResult = await schema.forgeAsync(-1);
+        expect(invalidResult.success).toBe(false);
     });
 });
