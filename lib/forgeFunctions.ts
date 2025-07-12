@@ -1,4 +1,3 @@
-import { isPromise } from 'util/types';
 import type {
     BaseForgeOptions,
     ForgeData,
@@ -24,7 +23,7 @@ export const verifyChain = <T = unknown>(
             lastMethodName = method.caller;
             const forgeResult = method.fn(data.value);
 
-            if (isPromise(forgeResult)) {
+            if (forgeResult instanceof Promise) {
                 issues.push({
                     success: false,
                     code: 'async_method_error',
@@ -32,7 +31,7 @@ export const verifyChain = <T = unknown>(
                     errorMessage: method.errorMessage,
                     path: method.path
                 });
-                return true;
+                return !method.loose;
             }
 
             if (typeof forgeResult === 'boolean') {
