@@ -26,8 +26,8 @@ export const verifyChain = <T = unknown>(
             if (forgeResult instanceof Promise) {
                 issues.push({
                     success: false,
-                    code: 'async_method_error',
-                    method: method.caller,
+                    errorCode: 'async_method_error',
+                    caller: method.caller,
                     errorMessage: method.errorMessage,
                     path: method.path
                 });
@@ -44,8 +44,8 @@ export const verifyChain = <T = unknown>(
                 if (!forgeResult) {
                     issues.push({
                         success: false,
-                        code: method.code || 'validation_error',
-                        method: method.caller,
+                        errorCode: method.errorCode || 'validation_error',
+                        caller: method.caller,
                         errorMessage: method.errorMessage,
                         path: method.path
                     });
@@ -59,15 +59,15 @@ export const verifyChain = <T = unknown>(
     } catch (error) {
         issues.push({
             success: false,
-            code: 'unexpected_error',
-            method: lastMethodName,
+            errorCode: 'unexpected_error',
+            caller: lastMethodName,
             errorMessage: error instanceof Error ? error.message : String(error)
         });
     }
 
     return issues.length === 0
         ? { success: true, value: data.value }
-        : { success: false, code: 'validation_error', method: '', issues };
+        : { success: false, errorCode: 'validation_error', caller: '', issues };
 };
 /**
  * Asynchronous version of the verifyChain function.
@@ -97,8 +97,8 @@ export const verifyChainAsync = async <T = unknown>(
                 if (!forgeResult) {
                     issues.push({
                         success: false,
-                        code: method.code || 'validation_error',
-                        method: method.caller,
+                        errorCode: method.errorCode || 'validation_error',
+                        caller: method.caller,
                         errorMessage: method.errorMessage,
                         path: method.path
                     });
@@ -113,15 +113,15 @@ export const verifyChainAsync = async <T = unknown>(
     } catch (error) {
         issues.push({
             success: false,
-            code: 'unexpected_error',
-            method: lastMethodName,
+            errorCode: 'unexpected_error',
+            caller: lastMethodName,
             errorMessage: error instanceof Error ? error.message : String(error)
         });
     }
 
     return issues.length === 0
         ? { success: true, value: data.value }
-        : { success: false, code: 'validation_error', method: '', issues };
+        : { success: false, errorCode: 'validation_error', caller: '', issues };
 };
 
 /**

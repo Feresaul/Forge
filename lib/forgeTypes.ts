@@ -1,4 +1,4 @@
-export type ForgeIssueCode =
+export type ErrorCode =
     | 'value_error'
     | 'validation_error'
     | 'async_method_error'
@@ -6,8 +6,8 @@ export type ForgeIssueCode =
 
 export type UnsuccessfulVerificationResult = {
     success: false;
-    code: ForgeIssueCode;
-    method: string;
+    errorCode: ErrorCode;
+    caller: string;
     errorMessage?: string;
     /**
      * The path to the value that failed verification.
@@ -45,7 +45,7 @@ export type CheckConfig = {
 
 export type ForgeMethod = {
     fn: ValidationFunction | MutationFunction;
-    code?: ForgeIssueCode;
+    errorCode?: ErrorCode;
     caller: string;
 } & CheckConfig;
 
@@ -61,12 +61,6 @@ export type BaseForgeMethodsConfig<T = unknown> = {
     isOptional: boolean;
     isNullable: boolean;
 };
-
-export type ReplaceForgeConfig<Target, TReplace extends object> = Omit<
-    Target,
-    keyof TReplace
-> &
-    TReplace;
 
 type ForgeFunction = <T = unknown>(value: T) => VerificationResult<T>;
 type ForgeFunctionAsync = <T = unknown>(
@@ -99,3 +93,9 @@ export type BaseForgeObject = Record<
     string,
     { forge: ForgeFunction; forgeAsync: ForgeFunctionAsync }
 >;
+
+export type ReplaceForgeConfig<Target, TReplace extends object> = Omit<
+    Target,
+    keyof TReplace
+> &
+    TReplace;

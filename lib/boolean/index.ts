@@ -70,7 +70,7 @@ export const boolean = (errorMessage?: string) => {
         [
             {
                 fn: forgeType,
-                code: 'value_error',
+                errorCode: 'value_error',
                 caller: 'boolean',
                 errorMessage
             }

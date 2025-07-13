@@ -124,7 +124,7 @@ export const string = (errorMessage?: string) => {
         [
             {
                 fn: forgeType,
-                code: 'value_error',
+                errorCode: 'value_error',
                 caller: 'string',
                 errorMessage
             }

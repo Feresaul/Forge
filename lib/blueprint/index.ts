@@ -59,8 +59,8 @@ export const blueprint = <TBlueprint extends BaseForgeObject>(
                             levelIssues = levelIssues.concat(
                                 issue.issues?.map((subIssue) => ({
                                     success: false,
-                                    code: subIssue.code,
-                                    method: subIssue.method,
+                                    errorCode: subIssue.errorCode,
+                                    caller: subIssue.caller,
                                     errorMessage: subIssue.errorMessage,
                                     path: [key]
                                 })) ?? []
@@ -87,8 +87,8 @@ export const blueprint = <TBlueprint extends BaseForgeObject>(
             if (issues.length > 0) {
                 return {
                     success: false,
-                    code: 'validation_error',
-                    method: '',
+                    errorCode: 'validation_error',
+                    caller: '',
                     issues
                 };
             }
@@ -126,8 +126,8 @@ export const blueprint = <TBlueprint extends BaseForgeObject>(
                                 levelIssues = levelIssues.concat(
                                     issue.issues?.map((subIssue) => ({
                                         success: false,
-                                        code: subIssue.code,
-                                        method: subIssue.method,
+                                        errorCode: subIssue.errorCode,
+                                        caller: subIssue.caller,
                                         errorMessage: subIssue.errorMessage,
                                         path: [key]
                                     })) ?? []
@@ -158,8 +158,8 @@ export const blueprint = <TBlueprint extends BaseForgeObject>(
             if (issues.length > 0) {
                 return {
                     success: false,
-                    code: 'validation_error',
-                    method: 'blueprint',
+                    errorCode: 'validation_error',
+                    caller: 'blueprint',
                     issues
                 };
             }
@@ -204,7 +204,7 @@ export const blueprint = <TBlueprint extends BaseForgeObject>(
         [
             {
                 fn: forgeType,
-                code: 'value_error',
+                errorCode: 'value_error',
                 caller: 'blueprint',
                 errorMessage
             }

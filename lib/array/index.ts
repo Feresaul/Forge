@@ -65,8 +65,8 @@ export const array = <
             if (issues.length > 0) {
                 return {
                     success: false,
-                    code: 'validation_error',
-                    method: '',
+                    errorCode: 'validation_error',
+                    caller: '',
                     issues
                 };
             }
@@ -110,8 +110,8 @@ export const array = <
             if (issues.length > 0) {
                 return {
                     success: false,
-                    code: 'validation_error',
-                    method: '',
+                    errorCode: 'validation_error',
+                    caller: '',
                     issues
                 };
             }
@@ -196,7 +196,7 @@ export const array = <
         [
             {
                 fn: forgeType,
-                code: 'value_error',
+                errorCode: 'value_error',
                 caller: 'array',
                 errorMessage
             }

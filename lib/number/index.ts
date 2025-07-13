@@ -103,7 +103,7 @@ export const number = (errorMessage?: string) => {
         [
             {
                 fn: forgeType,
-                code: 'value_error',
+                errorCode: 'value_error',
                 caller: 'number',
                 errorMessage
             }
