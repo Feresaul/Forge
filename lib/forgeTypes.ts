@@ -37,7 +37,7 @@ export type ValidationFunction = <T = unknown>(
 
 export type MutationFunction = <T = unknown>(value: T) => T | Promise<T>;
 
-export type ForgeCheckConfig = {
+export type CheckConfig = {
     errorMessage?: string;
     loose?: boolean;
     path?: string[];
@@ -47,7 +47,7 @@ export type ForgeMethod = {
     fn: ValidationFunction | MutationFunction;
     code?: ForgeIssueCode;
     caller: string;
-} & ForgeCheckConfig;
+} & CheckConfig;
 
 export type ForgeData<T = unknown> = { value: T; methods: ForgeMethod[] };
 
@@ -62,8 +62,19 @@ export type BaseForgeMethodsConfig<T = unknown> = {
     isNullable: boolean;
 };
 
-export type BaseForgeMethods<_Type = unknown> = {
-    _type: _Type;
+export type ReplaceForgeConfig<Target, TReplace extends object> = Omit<
+    Target,
+    keyof TReplace
+> &
+    TReplace;
+
+type ForgeFunction = <T = unknown>(value: T) => VerificationResult<T>;
+type ForgeFunctionAsync = <T = unknown>(
+    value: T
+) => Promise<VerificationResult<T>>;
+
+export type BaseForgeMethods<_ForgeType = unknown> = {
+    _type: _ForgeType;
     /**
      * Indicates if the value forged by this method is optional.
      */
@@ -76,18 +87,15 @@ export type BaseForgeMethods<_Type = unknown> = {
      * Forge a value based on the type and options defined in the chained methods.
      * @return A VerificationResult containing the forged value or an error if validation fails.
      */
-    forge: <T = unknown>(value: T) => VerificationResult<T>;
+    forge: ForgeFunction;
     /**
      * Forge a value asynchronously based on the type and options defined in the chained methods.
      * @return A VerificationResult containing the forged value or an error if validation fails.
      */
-    forgeAsync: <T = unknown>(value: T) => Promise<VerificationResult<T>>;
+    forgeAsync: ForgeFunctionAsync;
 };
 
 export type BaseForgeObject = Record<
     string,
-    {
-        forge: BaseForgeMethods['forge'];
-        forgeAsync: BaseForgeMethods['forgeAsync'];
-    }
+    { forge: ForgeFunction; forgeAsync: ForgeFunctionAsync }
 >;

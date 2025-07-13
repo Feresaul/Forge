@@ -2,7 +2,8 @@ import type {
     BaseForgeMethods,
     BaseForgeMethodsConfig,
     BaseForgeOptions,
-    ForgeCheckConfig
+    CheckConfig,
+    ReplaceForgeConfig
 } from '../forgeTypes';
 
 type ForgeOptions = { hasMin: boolean; hasMax: boolean };
@@ -22,7 +23,7 @@ type ForgeMethods<Config extends ForgeMethodsConfig> = BaseForgeMethods<
      */
     check: (
         fn: (value: Config['type']) => boolean | Promise<boolean>,
-        config?: ForgeCheckConfig
+        config?: CheckConfig
     ) => ForgeMethods<Config>;
 } & (Config['isOptional'] extends true
         ? object
@@ -31,13 +32,12 @@ type ForgeMethods<Config extends ForgeMethodsConfig> = BaseForgeMethods<
                * Applies an optional flag to the value forged by this method.
                * @returns A new ForgeMethods instance with the optional flag set.
                */
-              optional: () => ForgeMethods<{
-                  type: Config['type'] | undefined;
-                  isOptional: true;
-                  isNullable: Config['isNullable'];
-                  hasMin: Config['hasMin'];
-                  hasMax: Config['hasMax'];
-              }>;
+              optional: () => ForgeMethods<
+                  ReplaceForgeConfig<
+                      Config,
+                      { type: Config['type'] | undefined; isOptional: true }
+                  >
+              >;
           }) &
     (Config['isNullable'] extends true
         ? object
@@ -46,13 +46,12 @@ type ForgeMethods<Config extends ForgeMethodsConfig> = BaseForgeMethods<
                * Applies a nullable flag to the value forged by this method.
                * @returns A new ForgeMethods instance with the nullable flag set.
                */
-              nullable: () => ForgeMethods<{
-                  type: Config['type'] | null;
-                  isOptional: Config['isOptional'];
-                  isNullable: true;
-                  hasMin: Config['hasMin'];
-                  hasMax: Config['hasMax'];
-              }>;
+              nullable: () => ForgeMethods<
+                  ReplaceForgeConfig<
+                      Config,
+                      { type: Config['type'] | null; isNullable: true }
+                  >
+              >;
           }) &
     (Config['hasMin'] extends true
         ? object
@@ -66,13 +65,7 @@ type ForgeMethods<Config extends ForgeMethodsConfig> = BaseForgeMethods<
               min: (
                   min: number,
                   errorMessage?: string
-              ) => ForgeMethods<{
-                  type: Config['type'];
-                  isOptional: Config['isOptional'];
-                  isNullable: Config['isNullable'];
-                  hasMin: true;
-                  hasMax: Config['hasMax'];
-              }>;
+              ) => ForgeMethods<ReplaceForgeConfig<Config, { hasMin: true }>>;
           }) &
     (Config['hasMax'] extends true
         ? object
@@ -86,13 +79,7 @@ type ForgeMethods<Config extends ForgeMethodsConfig> = BaseForgeMethods<
               max: (
                   max: number,
                   errorMessage?: string
-              ) => ForgeMethods<{
-                  type: Config['type'];
-                  isOptional: Config['isOptional'];
-                  isNullable: Config['isNullable'];
-                  hasMin: Config['hasMin'];
-                  hasMax: true;
-              }>;
+              ) => ForgeMethods<ReplaceForgeConfig<Config, { hasMax: true }>>;
           });
 
 export type NumberMethods = ForgeMethods<ForgeMethodsConfig<number>>;

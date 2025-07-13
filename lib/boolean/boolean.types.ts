@@ -1,7 +1,8 @@
 import type {
     BaseForgeMethods,
     BaseForgeMethodsConfig,
-    ForgeCheckConfig
+    CheckConfig,
+    ReplaceForgeConfig
 } from '../forgeTypes';
 
 type ForgeMethods<Config extends BaseForgeMethodsConfig> = BaseForgeMethods<
@@ -15,7 +16,7 @@ type ForgeMethods<Config extends BaseForgeMethodsConfig> = BaseForgeMethods<
      */
     check: (
         fn: (value: Config['type']) => boolean | Promise<boolean>,
-        config?: ForgeCheckConfig
+        config?: CheckConfig
     ) => ForgeMethods<Config>;
 } & (Config['isOptional'] extends true
         ? object
@@ -24,11 +25,12 @@ type ForgeMethods<Config extends BaseForgeMethodsConfig> = BaseForgeMethods<
                * Applies an optional flag to the value forged by this method.
                * @returns A new ForgeMethods instance with the optional flag set.
                */
-              optional: () => ForgeMethods<{
-                  type: Config['type'] | undefined;
-                  isOptional: true;
-                  isNullable: Config['isNullable'];
-              }>;
+              optional: () => ForgeMethods<
+                  ReplaceForgeConfig<
+                      Config,
+                      { type: Config['type'] | undefined; isOptional: true }
+                  >
+              >;
           }) &
     (Config['isNullable'] extends true
         ? object
@@ -37,11 +39,12 @@ type ForgeMethods<Config extends BaseForgeMethodsConfig> = BaseForgeMethods<
                * Applies a nullable flag to the value forged by this method.
                * @returns A new ForgeMethods instance with the nullable flag set.
                */
-              nullable: () => ForgeMethods<{
-                  type: Config['type'] | null;
-                  isOptional: Config['isOptional'];
-                  isNullable: true;
-              }>;
+              nullable: () => ForgeMethods<
+                  ReplaceForgeConfig<
+                      Config,
+                      { type: Config['type'] | null; isNullable: true }
+                  >
+              >;
           });
 
 export type BooleanMethods = ForgeMethods<BaseForgeMethodsConfig<boolean>>;

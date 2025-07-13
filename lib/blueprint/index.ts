@@ -3,7 +3,7 @@ import { forgeMethods, verifyChain, verifyChainAsync } from '../forgeFunctions';
 import type {
     BaseForgeObject,
     BaseForgeOptions,
-    ForgeCheckConfig,
+    CheckConfig,
     ForgeMethod,
     UnsuccessfulVerificationResult,
     VerificationResult
@@ -176,7 +176,7 @@ export const blueprint = <TBlueprint extends BaseForgeObject>(
 
         const check = (
             fn: <T = unknown>(value: T) => boolean | Promise<boolean>,
-            config?: ForgeCheckConfig
+            config?: CheckConfig
         ) => {
             addToForge({ fn, caller: 'check', ...config });
             return createMethods(methods, forgeOptions);
