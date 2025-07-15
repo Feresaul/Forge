@@ -62,13 +62,8 @@ export type BaseForgeMethodsConfig<T = unknown> = {
     isNullable: boolean;
 };
 
-type ForgeFunction = <T = unknown>(value: T) => VerificationResult<T>;
-type ForgeFunctionAsync = <T = unknown>(
-    value: T
-) => Promise<VerificationResult<T>>;
-
-export type BaseForgeMethods<_ForgeType = unknown> = {
-    _type: _ForgeType;
+export type BaseForgeMethods<TValue> = {
+    _type: TValue;
     /**
      * Indicates if the value forged by this method is optional.
      */
@@ -81,20 +76,17 @@ export type BaseForgeMethods<_ForgeType = unknown> = {
      * Forge a value based on the type and options defined in the chained methods.
      * @return A VerificationResult containing the forged value or an error if validation fails.
      */
-    forge: ForgeFunction;
+    forge: <T = unknown>(value: T) => VerificationResult<T>;
     /**
      * Forge a value asynchronously based on the type and options defined in the chained methods.
      * @return A VerificationResult containing the forged value or an error if validation fails.
      */
-    forgeAsync: ForgeFunctionAsync;
+    forgeAsync: <T = unknown>(value: T) => Promise<VerificationResult<T>>;
 };
 
-export type BaseForgeObject = Record<
-    string,
-    { forge: ForgeFunction; forgeAsync: ForgeFunctionAsync }
->;
+export type BaseForgeObject = Record<string, BaseForgeMethods<unknown>>;
 
-export type ReplaceForgeConfig<Target, TReplace extends object> = Omit<
+export type UpdateForgeConfig<Target, TReplace extends object> = Omit<
     Target,
     keyof TReplace
 > &

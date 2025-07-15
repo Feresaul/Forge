@@ -1,7 +1,6 @@
 import type {
     BaseForgeOptions,
     ForgeData,
-    ForgeMethod,
     UnsuccessfulVerificationResult,
     VerificationResult
 } from './forgeTypes';
@@ -122,20 +121,4 @@ export const verifyChainAsync = async <T = unknown>(
     return issues.length === 0
         ? { success: true, value: data.value }
         : { success: false, errorCode: 'validation_error', caller: '', issues };
-};
-
-/**
- * Helper function to create a set of validation and mutation functions.
- * @param initialMethods - An array of initial validation and mutation functions.
- * @returns An object containing the methods and a method to add more.
- * The `addToForge` method allows adding new methods with an optional error message and caller name.
- */
-export const forgeMethods = (initialMethods: ForgeMethod[]) => {
-    const methods = initialMethods.slice();
-
-    const addToForge = (method: ForgeMethod) => {
-        methods.push(method);
-    };
-
-    return { methods, addToForge };
 };

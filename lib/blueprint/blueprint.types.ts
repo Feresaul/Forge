@@ -2,7 +2,7 @@ import type {
     BaseForgeMethods,
     BaseForgeMethodsConfig,
     CheckConfig,
-    ReplaceForgeConfig
+    UpdateForgeConfig
 } from '../forgeTypes';
 
 type BlueprintValues<T> = {
@@ -16,6 +16,10 @@ type BlueprintValues<T> = {
 type ForgeMethods<Config extends BaseForgeMethodsConfig> = BaseForgeMethods<
     BlueprintValues<Config['type']>
 > & {
+    /**
+     * The model of the blueprint, which is the type of the value forged by this method.
+     * Use a model to create new blueprints based on this one.
+     */
     model: Config['type'];
     /**
      * Checks if the value passes the custom validation function.
@@ -37,7 +41,7 @@ type ForgeMethods<Config extends BaseForgeMethodsConfig> = BaseForgeMethods<
                * @returns A new ForgeMethods instance with the optional flag set.
                */
               optional: () => ForgeMethods<
-                  ReplaceForgeConfig<
+                  UpdateForgeConfig<
                       Config,
                       { type: Config['type'] | undefined; isOptional: true }
                   >
@@ -51,7 +55,7 @@ type ForgeMethods<Config extends BaseForgeMethodsConfig> = BaseForgeMethods<
                * @returns A new ForgeMethods instance with the nullable flag set.
                */
               nullable: () => ForgeMethods<
-                  ReplaceForgeConfig<
+                  UpdateForgeConfig<
                       Config,
                       { type: Config['type'] | null; isNullable: true }
                   >

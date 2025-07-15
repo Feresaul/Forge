@@ -3,7 +3,7 @@ import {
     BaseForgeMethodsConfig,
     BaseForgeOptions,
     CheckConfig,
-    ReplaceForgeConfig
+    UpdateForgeConfig
 } from '../forgeTypes';
 
 type ForgeOptions = { hasMinLength: boolean; hasMaxLength: boolean };
@@ -40,7 +40,7 @@ type ForgeMethods<Config extends ForgeMethodsConfig> = BaseForgeMethods<
                * @returns A new ForgeMethods instance with the optional flag set.
                */
               optional: () => ForgeMethods<
-                  ReplaceForgeConfig<
+                  UpdateForgeConfig<
                       Config,
                       { type: Config['type'] | undefined; isOptional: true }
                   >
@@ -54,7 +54,7 @@ type ForgeMethods<Config extends ForgeMethodsConfig> = BaseForgeMethods<
                * @returns A new ForgeMethods instance with the nullable flag set.
                */
               nullable: () => ForgeMethods<
-                  ReplaceForgeConfig<
+                  UpdateForgeConfig<
                       Config,
                       { type: Config['type'] | null; isNullable: true }
                   >
@@ -73,7 +73,7 @@ type ForgeMethods<Config extends ForgeMethodsConfig> = BaseForgeMethods<
                   minLength: number,
                   errorMessage?: string
               ) => ForgeMethods<
-                  ReplaceForgeConfig<Config, { hasMinLength: true }>
+                  UpdateForgeConfig<Config, { hasMinLength: true }>
               >;
           }) &
     (Config['hasMaxLength'] extends true
@@ -89,7 +89,7 @@ type ForgeMethods<Config extends ForgeMethodsConfig> = BaseForgeMethods<
                   maxLength: number,
                   errorMessage?: string
               ) => ForgeMethods<
-                  ReplaceForgeConfig<Config, { hasMaxLength: true }>
+                  UpdateForgeConfig<Config, { hasMaxLength: true }>
               >;
           });
 

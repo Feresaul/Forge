@@ -1,4 +1,4 @@
-import { forgeMethods, verifyChain, verifyChainAsync } from '../forgeFunctions';
+import { verifyChain, verifyChainAsync } from '../forgeFunctions';
 
 import type {
     CheckConfig,
@@ -17,11 +17,9 @@ export const string = (errorMessage?: string) => {
         typeof value === 'string';
 
     const createMethods = (
-        initialMethods: ForgeMethod[],
+        methods: ForgeMethod[],
         forgeOptions: StringForgeOptions
     ) => {
-        const { methods, addToForge } = forgeMethods(initialMethods);
-
         const forge = <T = unknown>(value: T): VerificationResult<T> => {
             return verifyChain({ value, methods }, forgeOptions);
         };
@@ -44,56 +42,73 @@ export const string = (errorMessage?: string) => {
             fn: <T = unknown>(value: T) => boolean | Promise<boolean>,
             config?: CheckConfig
         ) => {
-            addToForge({ fn, caller: 'check', ...config });
-            return createMethods(methods, forgeOptions);
+            return createMethods(
+                [...methods, { fn, caller: 'check', ...config }],
+                forgeOptions
+            );
         };
 
         const minLength = (minLength: number, errorMessage?: string) => {
-            addToForge({
-                fn: <T = unknown>(value: T) => {
-                    if (typeof value === 'string') {
-                        return value.length >= minLength;
+            return createMethods(
+                [
+                    ...methods,
+                    {
+                        fn: <T = unknown>(value: T) => {
+                            if (typeof value === 'string') {
+                                return value.length >= minLength;
+                            }
+                            return false;
+                        },
+                        caller: 'minLength',
+                        errorMessage
                     }
-                    return false;
-                },
-                caller: 'minLength',
-                errorMessage
-            });
-            return createMethods(methods, {
-                ...forgeOptions,
-                hasMinLength: true
-            });
+                ],
+                {
+                    ...forgeOptions,
+                    hasMinLength: true
+                }
+            );
         };
 
         const maxLength = (maxLength: number, errorMessage?: string) => {
-            addToForge({
-                fn: <T = unknown>(value: T) => {
-                    if (typeof value === 'string') {
-                        return value.length <= maxLength;
+            return createMethods(
+                [
+                    ...methods,
+                    {
+                        fn: <T = unknown>(value: T) => {
+                            if (typeof value === 'string') {
+                                return value.length <= maxLength;
+                            }
+                            return false;
+                        },
+                        caller: 'maxLength',
+                        errorMessage
                     }
-                    return false;
-                },
-                caller: 'maxLength',
-                errorMessage
-            });
-            return createMethods(methods, {
-                ...forgeOptions,
-                hasMaxLength: true
-            });
+                ],
+                {
+                    ...forgeOptions,
+                    hasMaxLength: true
+                }
+            );
         };
 
         const regExp = (regex: RegExp, errorMessage?: string) => {
-            addToForge({
-                fn: <T = unknown>(value: T) => {
-                    if (typeof value === 'string') {
-                        return regex.test(value);
+            return createMethods(
+                [
+                    ...methods,
+                    {
+                        fn: <T = unknown>(value: T) => {
+                            if (typeof value === 'string') {
+                                return regex.test(value);
+                            }
+                            return false;
+                        },
+                        caller: 'regExp',
+                        errorMessage
                     }
-                    return false;
-                },
-                caller: 'regExp',
-                errorMessage
-            });
-            return createMethods(methods, forgeOptions);
+                ],
+                forgeOptions
+            );
         };
 
         const newMethods: Record<string, unknown> = {

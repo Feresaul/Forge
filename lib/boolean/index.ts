@@ -1,4 +1,4 @@
-import { forgeMethods, verifyChain, verifyChainAsync } from '../forgeFunctions';
+import { verifyChain, verifyChainAsync } from '../forgeFunctions';
 
 import type {
     BaseForgeOptions,
@@ -18,11 +18,9 @@ export const boolean = (errorMessage?: string) => {
         typeof value === 'boolean';
 
     const createMethods = (
-        initialMethods: ForgeMethod[],
+        methods: ForgeMethod[],
         forgeOptions: BaseForgeOptions
     ) => {
-        const { methods, addToForge } = forgeMethods(initialMethods);
-
         const forge = <T = unknown>(value: T): VerificationResult<T> => {
             return verifyChain({ value, methods }, forgeOptions);
         };
@@ -45,8 +43,10 @@ export const boolean = (errorMessage?: string) => {
             fn: <T = unknown>(value: T) => boolean | Promise<boolean>,
             config?: CheckConfig
         ) => {
-            addToForge({ fn, caller: 'check', ...config });
-            return createMethods(methods, forgeOptions);
+            return createMethods(
+                [...methods, { fn, caller: 'check', ...config }],
+                forgeOptions
+            );
         };
 
         const newMethods: Record<string, unknown> = {

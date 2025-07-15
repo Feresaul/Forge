@@ -1,4 +1,4 @@
-import { forgeMethods, verifyChain, verifyChainAsync } from '../forgeFunctions';
+import { verifyChain, verifyChainAsync } from '../forgeFunctions';
 
 import type {
     CheckConfig,
@@ -17,11 +17,9 @@ export const number = (errorMessage?: string) => {
         typeof value === 'number';
 
     const createMethods = (
-        initialMethods: ForgeMethod[],
+        methods: ForgeMethod[],
         forgeOptions: NumberForgeOptions
     ) => {
-        const { methods, addToForge } = forgeMethods(initialMethods);
-
         const forge = <T = unknown>(value: T): VerificationResult<T> => {
             return verifyChain({ value, methods }, forgeOptions);
         };
@@ -44,36 +42,48 @@ export const number = (errorMessage?: string) => {
             fn: <T = unknown>(value: T) => boolean | Promise<boolean>,
             config?: CheckConfig
         ) => {
-            addToForge({ fn, caller: 'check', ...config });
-            return createMethods(methods, forgeOptions);
+            return createMethods(
+                [...methods, { fn, caller: 'check', ...config }],
+                forgeOptions
+            );
         };
 
         const min = (min: number, errorMessage?: string) => {
-            addToForge({
-                fn: <T = unknown>(value: T) => {
-                    if (typeof value === 'number') {
-                        return value >= min;
+            return createMethods(
+                [
+                    ...methods,
+                    {
+                        fn: <T = unknown>(value: T) => {
+                            if (typeof value === 'number') {
+                                return value >= min;
+                            }
+                            return false;
+                        },
+                        caller: 'min',
+                        errorMessage
                     }
-                    return false;
-                },
-                caller: 'min',
-                errorMessage
-            });
-            return createMethods(methods, { ...forgeOptions, hasMin: true });
+                ],
+                { ...forgeOptions, hasMin: true }
+            );
         };
 
         const max = (max: number, errorMessage?: string) => {
-            addToForge({
-                fn: <T = unknown>(value: T) => {
-                    if (typeof value === 'number') {
-                        return value <= max;
+            return createMethods(
+                [
+                    ...methods,
+                    {
+                        fn: <T = unknown>(value: T) => {
+                            if (typeof value === 'number') {
+                                return value <= max;
+                            }
+                            return false;
+                        },
+                        caller: 'max',
+                        errorMessage
                     }
-                    return false;
-                },
-                caller: 'max',
-                errorMessage
-            });
-            return createMethods(methods, { ...forgeOptions, hasMax: true });
+                ],
+                { ...forgeOptions, hasMax: true }
+            );
         };
 
         const newMethods: Record<string, unknown> = {

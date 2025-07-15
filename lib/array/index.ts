@@ -1,4 +1,4 @@
-import { forgeMethods, verifyChain, verifyChainAsync } from '../forgeFunctions';
+import { verifyChain, verifyChainAsync } from '../forgeFunctions';
 
 import type {
     BaseForgeMethods,
@@ -30,11 +30,9 @@ export const array = <
     };
 
     const createMethods = (
-        initialMethods: ForgeMethod[],
+        methods: ForgeMethod[],
         forgeOptions: ArrayForgeOptions
     ) => {
-        const { methods, addToForge } = forgeMethods(initialMethods);
-
         const forge = <T = unknown>(values: T): VerificationResult<T> => {
             if (
                 (forgeOptions.optional && values === undefined) ||
@@ -130,42 +128,54 @@ export const array = <
             fn: <T = unknown>(value: T) => boolean,
             config?: CheckConfig
         ) => {
-            addToForge({ fn, caller: 'check', ...config });
-            return createMethods(methods, forgeOptions);
+            return createMethods(
+                [...methods, { fn, caller: 'check', ...config }],
+                forgeOptions
+            );
         };
 
         const minLength = (minLength: number, errorMessage?: string) => {
-            addToForge({
-                fn: <T = unknown>(value: T) => {
-                    if (Array.isArray(value)) {
-                        return value.length >= minLength;
+            return createMethods(
+                [
+                    ...methods,
+                    {
+                        fn: <T = unknown>(value: T) => {
+                            if (Array.isArray(value)) {
+                                return value.length >= minLength;
+                            }
+                            return false;
+                        },
+                        caller: 'minLength',
+                        errorMessage
                     }
-                    return false;
-                },
-                caller: 'minLength',
-                errorMessage
-            });
-            return createMethods(methods, {
-                ...forgeOptions,
-                hasMinLength: true
-            });
+                ],
+                {
+                    ...forgeOptions,
+                    hasMinLength: true
+                }
+            );
         };
 
         const maxLength = (maxLength: number, errorMessage?: string) => {
-            addToForge({
-                fn: <T = unknown>(value: T) => {
-                    if (Array.isArray(value)) {
-                        return value.length <= maxLength;
+            return createMethods(
+                [
+                    ...methods,
+                    {
+                        fn: <T = unknown>(value: T) => {
+                            if (Array.isArray(value)) {
+                                return value.length <= maxLength;
+                            }
+                            return false;
+                        },
+                        caller: 'maxLength',
+                        errorMessage
                     }
-                    return false;
-                },
-                caller: 'maxLength',
-                errorMessage
-            });
-            return createMethods(methods, {
-                ...forgeOptions,
-                hasMaxLength: true
-            });
+                ],
+                {
+                    ...forgeOptions,
+                    hasMaxLength: true
+                }
+            );
         };
 
         const newMethods: Record<string, unknown> = {

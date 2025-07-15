@@ -3,7 +3,7 @@ import type {
     BaseForgeMethodsConfig,
     BaseForgeOptions,
     CheckConfig,
-    ReplaceForgeConfig
+    UpdateForgeConfig
 } from '../forgeTypes';
 
 type ForgeOptions = { hasMin: boolean; hasMax: boolean };
@@ -33,7 +33,7 @@ type ForgeMethods<Config extends ForgeMethodsConfig> = BaseForgeMethods<
                * @returns A new ForgeMethods instance with the optional flag set.
                */
               optional: () => ForgeMethods<
-                  ReplaceForgeConfig<
+                  UpdateForgeConfig<
                       Config,
                       { type: Config['type'] | undefined; isOptional: true }
                   >
@@ -47,7 +47,7 @@ type ForgeMethods<Config extends ForgeMethodsConfig> = BaseForgeMethods<
                * @returns A new ForgeMethods instance with the nullable flag set.
                */
               nullable: () => ForgeMethods<
-                  ReplaceForgeConfig<
+                  UpdateForgeConfig<
                       Config,
                       { type: Config['type'] | null; isNullable: true }
                   >
@@ -65,7 +65,7 @@ type ForgeMethods<Config extends ForgeMethodsConfig> = BaseForgeMethods<
               min: (
                   min: number,
                   errorMessage?: string
-              ) => ForgeMethods<ReplaceForgeConfig<Config, { hasMin: true }>>;
+              ) => ForgeMethods<UpdateForgeConfig<Config, { hasMin: true }>>;
           }) &
     (Config['hasMax'] extends true
         ? object
@@ -79,7 +79,7 @@ type ForgeMethods<Config extends ForgeMethodsConfig> = BaseForgeMethods<
               max: (
                   max: number,
                   errorMessage?: string
-              ) => ForgeMethods<ReplaceForgeConfig<Config, { hasMax: true }>>;
+              ) => ForgeMethods<UpdateForgeConfig<Config, { hasMax: true }>>;
           });
 
 export type NumberMethods = ForgeMethods<ForgeMethodsConfig<number>>;

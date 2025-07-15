@@ -2,7 +2,7 @@ import type {
     BaseForgeMethods,
     BaseForgeMethodsConfig,
     CheckConfig,
-    ReplaceForgeConfig
+    UpdateForgeConfig
 } from '../forgeTypes';
 
 type ForgeMethods<Config extends BaseForgeMethodsConfig> = BaseForgeMethods<
@@ -26,7 +26,7 @@ type ForgeMethods<Config extends BaseForgeMethodsConfig> = BaseForgeMethods<
                * @returns A new ForgeMethods instance with the optional flag set.
                */
               optional: () => ForgeMethods<
-                  ReplaceForgeConfig<
+                  UpdateForgeConfig<
                       Config,
                       { type: Config['type'] | undefined; isOptional: true }
                   >
@@ -40,7 +40,7 @@ type ForgeMethods<Config extends BaseForgeMethodsConfig> = BaseForgeMethods<
                * @returns A new ForgeMethods instance with the nullable flag set.
                */
               nullable: () => ForgeMethods<
-                  ReplaceForgeConfig<
+                  UpdateForgeConfig<
                       Config,
                       { type: Config['type'] | null; isNullable: true }
                   >
