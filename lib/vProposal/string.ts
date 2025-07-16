@@ -1,12 +1,13 @@
-import { baseForgeType, ForgeMethodConfig } from './baseForgeType';
+import { baseForgeType } from './baseForgeType';
+import { type ForgeMethodConfig } from './types';
 
 export const string = () =>
     baseForgeType<
         string,
         {
-            regExp: (pattern: RegExp) => unknown;
-            minLength: (min: number) => unknown;
-            maxLength: (max: number) => unknown;
+            regExp: (pattern: RegExp, config?: ForgeMethodConfig) => unknown;
+            minLength: (min: number, config?: ForgeMethodConfig) => unknown;
+            maxLength: (max: number, config?: ForgeMethodConfig) => unknown;
         }
     >({
         isOptional: false,

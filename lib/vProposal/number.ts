@@ -1,14 +1,15 @@
-import { baseForgeType, ForgeMethodConfig } from './baseForgeType';
+import { baseForgeType } from './baseForgeType';
+import { type ForgeMethodConfig } from './types';
 
 export const number = () => {
     return baseForgeType<
         number,
         {
-            min: (min: number) => unknown;
-            max: (max: number) => unknown;
-            positive: () => unknown;
-            negative: () => unknown;
-            integer: () => unknown;
+            min: (min: number, config?: ForgeMethodConfig) => unknown;
+            max: (max: number, config?: ForgeMethodConfig) => unknown;
+            positive: (config?: ForgeMethodConfig) => unknown;
+            negative: (config?: ForgeMethodConfig) => unknown;
+            integer: (config?: ForgeMethodConfig) => unknown;
         }
     >({
         isOptional: false,
