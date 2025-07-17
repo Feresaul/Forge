@@ -1,83 +1,59 @@
-import { ForgeMethod, ForgeMethodConfig, VerificationResult } from './types';
-
-type UnknownObject = Record<string, unknown>;
-
-type BaseForgeTypeConfig<Methods extends UnknownObject> = {
-    isOptional: boolean;
-    isNullable: boolean;
-    queue: ForgeMethod[];
-    methods?: (addToForge: (method: ForgeMethod) => unknown) => Methods;
-};
-
-type BaseForgeType<FType, Methods> = {
-    isOptional: boolean;
-    isNullable: boolean;
-    optional: () => BaseForgeType<FType | undefined, Methods>;
-    nullable: () => BaseForgeType<FType | null, Methods>;
-    check: (
-        fn: <T = FType>(value: T) => boolean | Promise<boolean>,
-        config?: { errorMessage?: string; path?: string[]; loose?: boolean }
-    ) => BaseForgeType<FType, Methods>;
-    forge: <T = unknown>(value: T) => VerificationResult<T>;
-} & {
-    [K in keyof Methods]: Methods[K] extends (...args: infer FArgs) => unknown
-        ? (...args: FArgs) => BaseForgeType<FType, Methods>
-        : Methods[K];
-};
+import { verifyChainAsync } from './forgeFunctions';
+import type {
+    BaseForgeType,
+    BaseForgeTypeConfig,
+    ForgeMethod,
+    ForgeMethodConfig,
+    ForgeState,
+    UnknownObject,
+    VerificationResult
+} from './types';
 
 export const baseForgeType = <
-    FType,
-    Methods extends UnknownObject = UnknownObject
+    Methods extends UnknownObject,
+    State extends ForgeState<Methods>
 >(
     config: BaseForgeTypeConfig<Methods>
 ) => {
-    const addToForge = (method: ForgeMethod): BaseForgeType<FType, Methods> => {
-        return baseForgeType<FType, Methods>({
+    const addToForge = (method: ForgeMethod) => {
+        return baseForgeType<Methods, State>({
             ...config,
             queue: [...config.queue, method]
         });
     };
 
-    const optional = (): BaseForgeType<FType | undefined, Methods> => {
-        return baseForgeType<FType | undefined, Methods>({
-            ...config,
-            isOptional: true
-        });
+    const optional = () => {
+        return baseForgeType<
+            Methods,
+            {
+                type: State['type'] | undefined;
+                optional: true;
+                nullable: State['nullable'];
+            } & { [K in keyof Methods]: State[K] }
+        >({ ...config, isOptional: true });
     };
 
-    const nullable = (): BaseForgeType<FType | null, Methods> => {
-        return baseForgeType<FType | null, Methods>({
-            ...config,
-            isNullable: true
-        });
+    const nullable = () => {
+        return baseForgeType<
+            Methods,
+            {
+                type: State['type'] | null;
+                optional: State['optional'];
+                nullable: true;
+            } & { [K in keyof Methods]: State[K] }
+        >({ ...config, isNullable: true });
     };
 
     const check = (
-        fn: <T = FType>(value: T) => boolean | Promise<boolean>,
+        fn: <T = State['type']>(value: T) => boolean | Promise<boolean>,
         config?: ForgeMethodConfig
-    ): BaseForgeType<FType, Methods> => {
+    ): BaseForgeType<Methods, State> => {
         return addToForge({ fn, caller: 'check', ...config });
     };
 
-    const forge = <T = unknown>(value: T): VerificationResult<T> => {
-        for (const method of config.queue) {
-            const { fn, ...methodConfig } = method;
-            const result = fn(value);
-            if (result instanceof Promise) {
-                return {
-                    success: false,
-                    ...methodConfig
-                };
-            }
-            if (!result) {
-                return {
-                    success: false,
-                    ...methodConfig
-                };
-            }
-        }
-        return { success: true, value };
-    };
+    const forge = async <T = unknown>(
+        value: T
+    ): Promise<VerificationResult<T>> => verifyChainAsync(value, config);
 
     return {
         isOptional: config.isOptional,
@@ -85,7 +61,13 @@ export const baseForgeType = <
         optional,
         nullable,
         check,
-        forge,
+        forge: config.forge
+            ? config.forge({
+                  isOptional: config.isOptional,
+                  isNullable: config.isNullable,
+                  queue: config.queue
+              })
+            : forge,
         ...config.methods?.(addToForge)
-    } as BaseForgeType<FType, Methods>;
+    } as BaseForgeType<Methods, State>;
 };

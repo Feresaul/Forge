@@ -1,21 +1,29 @@
 import { baseForgeType } from './baseForgeType';
-import { type ForgeMethodConfig } from './types';
+import type { BaseForgeType, ForgeMethodConfig } from './types';
 
-export const string = () =>
-    baseForgeType<
-        string,
-        {
-            regExp: (pattern: RegExp, config?: ForgeMethodConfig) => unknown;
-            minLength: (min: number, config?: ForgeMethodConfig) => unknown;
-            maxLength: (max: number, config?: ForgeMethodConfig) => unknown;
-        }
-    >({
+export const string = (): BaseForgeType<
+    {
+        regExp: (pattern: RegExp, config?: ForgeMethodConfig) => unknown;
+        minLength: (min: number, config?: ForgeMethodConfig) => unknown;
+        maxLength: (max: number, config?: ForgeMethodConfig) => unknown;
+    },
+    {
+        type: string;
+        optional: false;
+        nullable: false;
+        minLength: false;
+        maxLength: false;
+        regExp: null;
+    }
+> =>
+    baseForgeType({
         isOptional: false,
         isNullable: false,
         queue: [
             {
                 fn: (value: unknown) => typeof value === 'string',
-                caller: 'string'
+                caller: 'string',
+                errorCode: 'value_error'
             }
         ],
         methods: (addToForge) => ({
