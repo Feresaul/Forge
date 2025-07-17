@@ -3,8 +3,10 @@ import type { BaseForgeType, ForgeMethodConfig } from './types';
 
 export const number = (): BaseForgeType<
     {
-        min: (min: number, config?: ForgeMethodConfig) => unknown;
-        max: (max: number, config?: ForgeMethodConfig) => unknown;
+        lt: (max: number, config?: ForgeMethodConfig) => { lte: false };
+        lte: (min: number, config?: ForgeMethodConfig) => { lt: false };
+        gt: (min: number, config?: ForgeMethodConfig) => { gte: false };
+        gte: (max: number, config?: ForgeMethodConfig) => { gt: false };
         positive: (config?: ForgeMethodConfig) => { negative: false };
         negative: (config?: ForgeMethodConfig) => { positive: false };
         integer: (config?: ForgeMethodConfig) => unknown;
@@ -13,8 +15,10 @@ export const number = (): BaseForgeType<
         type: number;
         optional: false;
         nullable: false;
-        min: false;
-        max: false;
+        lt: false;
+        lte: false;
+        gt: false;
+        gte: false;
         positive: false;
         negative: false;
         integer: false;
@@ -31,20 +35,36 @@ export const number = (): BaseForgeType<
             }
         ],
         methods: (addToForge) => ({
-            min: (min: number, config?: ForgeMethodConfig) =>
+            lt: (val: number, config?: ForgeMethodConfig) =>
                 addToForge({
                     fn: (value: unknown) => {
-                        return typeof value === 'number' && value >= min;
+                        return typeof value === 'number' && value < val;
                     },
-                    caller: 'min',
+                    caller: 'lt',
                     ...config
                 }),
-            max: (max: number, config?: ForgeMethodConfig) =>
+            lte: (min: number, config?: ForgeMethodConfig) =>
                 addToForge({
                     fn: (value: unknown) => {
-                        return typeof value === 'number' && value <= max;
+                        return typeof value === 'number' && value <= min;
                     },
-                    caller: 'max',
+                    caller: 'lte',
+                    ...config
+                }),
+            gt: (val: number, config?: ForgeMethodConfig) =>
+                addToForge({
+                    fn: (value: unknown) => {
+                        return typeof value === 'number' && value > val;
+                    },
+                    caller: 'gt',
+                    ...config
+                }),
+            gte: (max: number, config?: ForgeMethodConfig) =>
+                addToForge({
+                    fn: (value: unknown) => {
+                        return typeof value === 'number' && value >= max;
+                    },
+                    caller: 'gte',
                     ...config
                 }),
             positive: (config?: ForgeMethodConfig) =>
