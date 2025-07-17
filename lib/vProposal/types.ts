@@ -91,9 +91,11 @@ export type BaseForgeType<
     [MethodName in keyof Methods]: Methods[MethodName] extends (
         ...args: infer FArgs
     ) => unknown
-        ? State[MethodName] extends null
+        ? // If state is null function can be used multiple times
+          State[MethodName] extends null
             ? (...args: FArgs) => BaseForgeType<Methods, State>
-            : State[MethodName] extends true
+            : // If state is not null, function can only be used once
+              State[MethodName] extends true
               ? never
               : (...args: FArgs) => BaseForgeType<
                     Methods,
@@ -102,6 +104,8 @@ export type BaseForgeType<
                         optional: State['optional'];
                         nullable: State['nullable'];
                     } & {
+                        // Update state to true for the method that was called
+                        // - If it has dependencies, they are set to true as well
                         [StateItem in keyof Methods]: StateItem extends MethodName
                             ? true
                             : ReturnType<Methods[MethodName]> extends {
