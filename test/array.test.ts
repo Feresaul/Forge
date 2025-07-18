@@ -92,7 +92,7 @@ describe('f.array', () => {
     it('should validate async check', async () => {
         const schema = f.array(f.string()).check(
             async (value) => {
-                await new Promise((resolve) => setTimeout(resolve, 10));
+                await new Promise((resolve) => setTimeout(resolve, 100));
                 return value.length > 0;
             },
             { errorMessage: 'Array must not be empty' }

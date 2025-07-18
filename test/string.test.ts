@@ -101,7 +101,7 @@ describe('f.string', () => {
     it('should validate async check', async () => {
         const schema = f.string().check(
             async (value) => {
-                await new Promise((resolve) => setTimeout(resolve, 10));
+                await new Promise((resolve) => setTimeout(resolve, 100));
                 return value === value.toUpperCase();
             },
             { errorMessage: 'String must be uppercase' }

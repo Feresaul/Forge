@@ -61,7 +61,7 @@ describe('f.boolean', () => {
     it('should validate async check', async () => {
         const schema = f.boolean().check(
             async (value) => {
-                await new Promise((resolve) => setTimeout(resolve, 10));
+                await new Promise((resolve) => setTimeout(resolve, 100));
                 return value === true;
             },
             { errorMessage: 'Value must be true' }

@@ -82,3 +82,4 @@
 - Always ensure tests are deterministic and do not rely on external factors.
 - Use mock data where necessary.
 - Keep tests isolated and independent of each other.
+- For mocked Promises - setTimeout should resolve within 100-150ms.

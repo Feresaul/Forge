@@ -87,7 +87,7 @@ describe('f.number', () => {
     it('should validate async check', async () => {
         const schema = f.number().check(
             async (value) => {
-                await new Promise((resolve) => setTimeout(resolve, 10));
+                await new Promise((resolve) => setTimeout(resolve, 100));
                 return value > 0;
             },
             { errorMessage: 'Number must be positive' }

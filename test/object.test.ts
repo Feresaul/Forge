@@ -136,7 +136,7 @@ describe('f.object', () => {
     it('should validate async check', async () => {
         const schema = f.object({ name: f.string(), age: f.number() }).check(
             async (value) => {
-                await new Promise((resolve) => setTimeout(resolve, 10));
+                await new Promise((resolve) => setTimeout(resolve, 100));
                 return value.age > 18;
             },
             { errorMessage: 'Age must be greater than 18' }
