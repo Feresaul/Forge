@@ -13,8 +13,9 @@
 - Validate the primary functionality of the module.
 - Example:
     ```typescript
-    it('should return true for a valid input', () => {
-        expect(f.module().forge(validInput).success).toBe(true);
+    it('should return true for a valid input', async () => {
+        const result = await f.module().forge(validInput);
+        expect(result.success).toBe(true);
     });
     ```
 
@@ -23,8 +24,9 @@
 - Test invalid inputs and edge cases.
 - Example:
     ```typescript
-    it('should return false for an invalid input', () => {
-        expect(f.module().forge(invalidInput).success).toBe(false);
+    it('should return false for an invalid input', async () => {
+        const result = await f.module().forge(invalidInput);
+        expect(result.success).toBe(false);
     });
     ```
 
@@ -32,12 +34,19 @@
 
 - Test all available methods (`optional`, `nullable`, `check`, etc.).
 - Example:
+
     ```typescript
-    it('should handle optional and nullable inputs', () => {
+    it('should handle optional and nullable configs', async () => {
         const schema = f.module().optional().nullable();
-        expect(schema.forge(undefined).success).toBe(true);
-        expect(schema.forge(null).success).toBe(true);
-        expect(schema.forge(validInput).success).toBe(true);
+
+        const result1 = await schema.forge(undefined);
+        expect(result1.success).toBe(true);
+
+        const result2 = await schema.forge(null);
+        expect(result2.success).toBe(true);
+
+        const result3 = await schema.forge(validInput);
+        expect(result3.success).toBe(true);
     });
     ```
 
@@ -63,13 +72,14 @@
 
 - Refer to existing test files for examples:
     - `array.test.ts`
-    - `string.test.ts`
-    - `number.test.ts`
     - `boolean.test.ts`
-    - `blueprint.test.ts`
+    - `number.test.ts`
+    - `object.test.ts`
+    - `string.test.ts`
 
 ## Notes
 
 - Always ensure tests are deterministic and do not rely on external factors.
 - Use mock data where necessary.
 - Keep tests isolated and independent of each other.
+- For mocked Promises - setTimeout should resolve within 100-150ms.
