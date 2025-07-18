@@ -45,10 +45,14 @@ export const baseForgeType = <
     };
 
     const check = (
-        fn: <T = State['type']>(value: T) => boolean | Promise<boolean>,
+        fn: (value: State['type']) => boolean | Promise<boolean>,
         config?: ForgeMethodConfig
     ): BaseForgeType<Methods, State> => {
-        return addToForge({ fn, caller: 'check', ...config });
+        return addToForge({
+            fn: (value: unknown) => fn(value as State['type']),
+            caller: 'check',
+            ...config
+        });
     };
 
     const forge = async <T = unknown>(

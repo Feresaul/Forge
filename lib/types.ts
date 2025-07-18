@@ -83,7 +83,7 @@ export type BaseForgeType<
               } & { [K in keyof Methods]: State[K] }
           >;
     check: (
-        fn: <T = State['type']>(value: T) => boolean | Promise<boolean>,
+        fn: (value: State['type']) => boolean | Promise<boolean>,
         config?: ForgeMethodConfig
     ) => BaseForgeType<Methods, State>;
     forge: <T = unknown>(value: T) => Promise<VerificationResult<T>>;
@@ -115,7 +115,7 @@ export type BaseForgeType<
                               : State[StateItem];
                     }
                 >
-        : never;
+        : Methods[MethodName];
 };
 
 export type BaseForgeObject = {

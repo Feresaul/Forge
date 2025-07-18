@@ -1,5 +1,5 @@
-import { baseForgeType } from './baseForgeType';
-import type { BaseForgeType, ForgeMethodConfig } from './types';
+import { baseForgeType } from '../baseForgeType';
+import type { BaseForgeType, ForgeMethodConfig } from '../types';
 
 export const string = (): BaseForgeType<
     {

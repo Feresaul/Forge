@@ -1,5 +1,5 @@
-import { baseForgeType } from './baseForgeType';
-import type { BaseForgeType } from './types';
+import { baseForgeType } from '../baseForgeType';
+import type { BaseForgeType } from '../types';
 
 export const boolean = (): BaseForgeType<
     { _: unknown },

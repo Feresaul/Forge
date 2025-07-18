@@ -1,103 +1,39 @@
 import type {
-    BaseForgeOptions,
-    ForgeData,
+    BaseForgeConfig,
     UnsuccessfulVerificationResult,
     VerificationResult
-} from './forgeTypes';
+} from './types';
 
 /**
  * Helper function to verify a value against a chain of validation functions.
- * @param data - Data and configuration for the verification.
- * @returns A VerificationResult indicating the outcome of the verification.
- */
-export const verifyChain = <T = unknown>(
-    data: ForgeData<T>,
-    options: BaseForgeOptions
-): VerificationResult<T> => {
-    let lastMethodName = '';
-    const issues: UnsuccessfulVerificationResult[] = [];
-
-    try {
-        data.methods.some((method) => {
-            lastMethodName = method.caller;
-            const forgeResult = method.fn(data.value);
-
-            if (forgeResult instanceof Promise) {
-                issues.push({
-                    success: false,
-                    errorCode: 'async_method_error',
-                    caller: method.caller,
-                    errorMessage: method.errorMessage,
-                    path: method.path
-                });
-                return !method.loose;
-            }
-
-            if (typeof forgeResult === 'boolean') {
-                if (
-                    (options.optional && data.value === undefined) ||
-                    (options.nullable && data.value === null)
-                ) {
-                    return true;
-                }
-                if (!forgeResult) {
-                    issues.push({
-                        success: false,
-                        errorCode: method.errorCode || 'validation_error',
-                        caller: method.caller,
-                        errorMessage: method.errorMessage,
-                        path: method.path
-                    });
-                    return !method.loose;
-                }
-                return false;
-            }
-
-            return false;
-        });
-    } catch (error) {
-        issues.push({
-            success: false,
-            errorCode: 'unexpected_error',
-            caller: lastMethodName,
-            errorMessage: error instanceof Error ? error.message : String(error)
-        });
-    }
-
-    return issues.length === 0
-        ? { success: true, value: data.value }
-        : { success: false, errorCode: 'validation_error', caller: '', issues };
-};
-/**
- * Asynchronous version of the verifyChain function.
  * @param data - Data and configuration for the verification.
  * @param options - Options for the verification process.
  * @returns A Promise that resolves to a VerificationResult indicating the outcome of the verification.
  */
 export const verifyChainAsync = async <T = unknown>(
-    data: ForgeData<T>,
-    options: BaseForgeOptions
+    value: T,
+    config: BaseForgeConfig
 ): Promise<VerificationResult<T>> => {
     let lastMethodName = '';
     const issues: UnsuccessfulVerificationResult[] = [];
 
     try {
-        for (const method of data.methods) {
+        for (const method of config.queue) {
             lastMethodName = method.caller;
-            const forgeResult = await method.fn(data.value);
+            const forgeResult = await method.fn(value);
 
             if (typeof forgeResult === 'boolean') {
                 if (
-                    (options.optional && data.value === undefined) ||
-                    (options.nullable && data.value === null)
+                    (config.isOptional && value === undefined) ||
+                    (config.isNullable && value === null)
                 ) {
                     break;
                 }
                 if (!forgeResult) {
                     issues.push({
                         success: false,
-                        errorCode: method.errorCode || 'validation_error',
                         caller: method.caller,
+                        errorCode: method.errorCode || 'validation_error',
                         errorMessage: method.errorMessage,
                         path: method.path
                     });
@@ -112,13 +48,18 @@ export const verifyChainAsync = async <T = unknown>(
     } catch (error) {
         issues.push({
             success: false,
-            errorCode: 'unexpected_error',
             caller: lastMethodName,
+            errorCode: 'unexpected_error',
             errorMessage: error instanceof Error ? error.message : String(error)
         });
     }
 
     return issues.length === 0
-        ? { success: true, value: data.value }
-        : { success: false, errorCode: 'validation_error', caller: '', issues };
+        ? { success: true, value }
+        : {
+              success: false,
+              caller: '',
+              errorCode: 'validation_error',
+              issues
+          };
 };

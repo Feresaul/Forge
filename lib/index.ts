@@ -1,11 +1,10 @@
-import { array } from './array';
-import { blueprint } from './blueprint';
-import { boolean } from './boolean';
-import { number } from './number';
-import { string } from './string';
-import { RegExp } from './forgeRegExp';
+import { array } from './forgeTypes/array';
+import { boolean } from './forgeTypes/boolean';
+import { number } from './forgeTypes/number';
+import { object } from './forgeTypes/object';
+import { string } from './forgeTypes/string';
 
-const f = { array, blueprint, boolean, number, string, RegExp };
+const f = { array, boolean, number, object, string };
 
-export { array, blueprint, boolean, number, string, RegExp };
+export { array, boolean, number, object, string };
 export default f;

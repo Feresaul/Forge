@@ -1,11 +1,11 @@
-import { baseForgeType } from './baseForgeType';
-import { verifyChainAsync } from './forgeFunctions';
+import { baseForgeType } from '../baseForgeType';
+import { verifyChainAsync } from '../forgeFunctions';
 import type {
     BaseForgeObject,
     BaseForgeType,
     ForgeMethodConfig,
     UnsuccessfulVerificationResult
-} from './types';
+} from '../types';
 
 export const array = <T extends BaseForgeObject>(
     model: T
@@ -84,7 +84,7 @@ export const array = <T extends BaseForgeObject>(
                 if (issues.length > 0) {
                     return {
                         success: false,
-                        caller: '',
+                        caller: 'array',
                         errorCode: 'validation_error',
                         issues
                     };
