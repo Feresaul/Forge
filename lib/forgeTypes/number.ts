@@ -3,10 +3,10 @@ import type { BaseForgeType, ForgeMethodConfig } from '../types';
 
 export const number = (): BaseForgeType<
     {
-        lt: (max: number, config?: ForgeMethodConfig) => { lte: false };
-        lte: (min: number, config?: ForgeMethodConfig) => { lt: false };
-        gt: (min: number, config?: ForgeMethodConfig) => { gte: false };
-        gte: (max: number, config?: ForgeMethodConfig) => { gt: false };
+        lt: (val: number, config?: ForgeMethodConfig) => { lte: false };
+        lte: (max: number, config?: ForgeMethodConfig) => { lt: false };
+        gt: (val: number, config?: ForgeMethodConfig) => { gte: false };
+        gte: (min: number, config?: ForgeMethodConfig) => { gt: false };
         positive: (config?: ForgeMethodConfig) => { negative: false };
         negative: (config?: ForgeMethodConfig) => { positive: false };
         integer: (config?: ForgeMethodConfig) => unknown;
@@ -43,10 +43,10 @@ export const number = (): BaseForgeType<
                     caller: 'lt',
                     ...config
                 }),
-            lte: (min: number, config?: ForgeMethodConfig) =>
+            lte: (max: number, config?: ForgeMethodConfig) =>
                 addToForge({
                     fn: (value: unknown) => {
-                        return typeof value === 'number' && value <= min;
+                        return typeof value === 'number' && value <= max;
                     },
                     caller: 'lte',
                     ...config
@@ -59,10 +59,10 @@ export const number = (): BaseForgeType<
                     caller: 'gt',
                     ...config
                 }),
-            gte: (max: number, config?: ForgeMethodConfig) =>
+            gte: (min: number, config?: ForgeMethodConfig) =>
                 addToForge({
                     fn: (value: unknown) => {
-                        return typeof value === 'number' && value >= max;
+                        return typeof value === 'number' && value >= min;
                     },
                     caller: 'gte',
                     ...config
