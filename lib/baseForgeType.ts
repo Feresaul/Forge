@@ -44,18 +44,18 @@ export const baseForgeType = <
         >({ ...config, isNullable: true });
     };
 
-    const check = (
+    const refine = (
         fn: (value: State['type']) => boolean | Promise<boolean>,
         config?: ForgeMethodConfig
     ): BaseForgeType<Methods, State> => {
         return addToForge({
             fn: (value: unknown) => fn(value as State['type']),
-            caller: 'check',
+            caller: 'refine',
             ...config
         });
     };
 
-    const forge = async <T = unknown>(
+    const craft = async <T = unknown>(
         value: T
     ): Promise<VerificationResult<T>> => verifyChainAsync(value, config);
 
@@ -64,14 +64,14 @@ export const baseForgeType = <
         isNullable: config.isNullable,
         optional,
         nullable,
-        check,
-        forge: config.forge
-            ? config.forge({
+        refine,
+        craft: config.craft
+            ? config.craft({
                   isOptional: config.isOptional,
                   isNullable: config.isNullable,
                   queue: config.queue
               })
-            : forge,
+            : craft,
         ...config.methods?.(addToForge)
     } as BaseForgeType<Methods, State>;
 };

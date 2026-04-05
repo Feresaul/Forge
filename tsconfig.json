@@ -3,21 +3,19 @@
         "lib": ["ESNext"],
         "target": "ESNext",
         "module": "ESNext",
+        "moduleResolution": "bundler",
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
-        "noEmit": false,
-        "moduleResolution": "bundler",
-        // Best practices
         "strict": true,
         "skipLibCheck": true,
         "noFallthroughCasesInSwitch": true,
-        // Some stricter flags (disabled by default)
         "noUnusedLocals": false,
         "noUnusedParameters": false,
         "noPropertyAccessFromIndexSignature": false,
+        "rootDir": "lib",
         "outDir": "dist",
         "declaration": true,
         "declarationDir": "dist/types"
     },
-    "include": ["lib/**/*", "tests/**/*"]
+    "include": ["lib/**/*"]
 }

@@ -40,7 +40,7 @@ export const object = <Model extends Record<string, BaseForgeObject>>(
             }
         ],
         methods: () => ({ model }),
-        forge:
+        craft:
             (config) =>
             async <T = unknown>(value: T) => {
                 if (
@@ -55,7 +55,7 @@ export const object = <Model extends Record<string, BaseForgeObject>>(
                 // Verify all properties in the model
                 await Promise.all(
                     Object.entries(model).map(async ([key, forgeElement]) => {
-                        const res = await forgeElement.forge(
+                        const res = await forgeElement.craft(
                             value
                                 ? (value as Record<string, unknown>)[key]
                                 : undefined

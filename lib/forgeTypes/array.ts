@@ -50,7 +50,7 @@ export const array = <T extends BaseForgeObject>(
                     ...config
                 })
         }),
-        forge:
+        craft:
             (config) =>
             async <T = unknown>(values: T) => {
                 if (
@@ -66,7 +66,7 @@ export const array = <T extends BaseForgeObject>(
                 if (Array.isArray(values)) {
                     await Promise.all(
                         values.map(async (value, idx) => {
-                            const res = await model.forge(value);
+                            const res = await model.craft(value);
                             if (!res.success) {
                                 // Push the issue with the index of the array
                                 issues.push({ ...res, arrayIndex: idx });

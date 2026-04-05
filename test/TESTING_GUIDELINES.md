@@ -14,7 +14,7 @@
 - Example:
     ```typescript
     it('should return true for a valid input', async () => {
-        const result = await f.module().forge(validInput);
+        const result = await f.module().craft(validInput);
         expect(result.success).toBe(true);
     });
     ```
@@ -25,7 +25,7 @@
 - Example:
     ```typescript
     it('should return false for an invalid input', async () => {
-        const result = await f.module().forge(invalidInput);
+        const result = await f.module().craft(invalidInput);
         expect(result.success).toBe(false);
     });
     ```
@@ -39,13 +39,13 @@
     it('should handle optional and nullable configs', async () => {
         const schema = f.module().optional().nullable();
 
-        const result1 = await schema.forge(undefined);
+        const result1 = await schema.craft(undefined);
         expect(result1.success).toBe(true);
 
-        const result2 = await schema.forge(null);
+        const result2 = await schema.craft(null);
         expect(result2.success).toBe(true);
 
-        const result3 = await schema.forge(validInput);
+        const result3 = await schema.craft(validInput);
         expect(result3.success).toBe(true);
     });
     ```

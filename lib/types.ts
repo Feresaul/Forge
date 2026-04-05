@@ -16,6 +16,11 @@ export type ForgeMethod = ForgeMethodConfig & {
     errorCode?: ErrorCode;
 };
 
+export type SuccessfulVerificationResult<T = unknown> = {
+    success: true;
+    value: T;
+};
+
 export type UnsuccessfulVerificationResult = {
     success: false;
     caller: string;
@@ -27,7 +32,7 @@ export type UnsuccessfulVerificationResult = {
 };
 
 export type VerificationResult<T = unknown> =
-    | { success: true; value: T }
+    | SuccessfulVerificationResult<T>
     | UnsuccessfulVerificationResult;
 
 export type UnknownObject = Record<string, unknown>;
@@ -49,7 +54,7 @@ export type BaseForgeConfig = {
 export type BaseForgeTypeConfig<Methods extends UnknownObject> =
     BaseForgeConfig & {
         methods?: (addToForge: (method: ForgeMethod) => unknown) => Methods;
-        forge?: (
+        craft?: (
             config: BaseForgeConfig
         ) => <T = unknown>(value: T) => Promise<VerificationResult<unknown>>;
     };
@@ -82,11 +87,11 @@ export type BaseForgeType<
                   nullable: true;
               } & { [K in keyof Methods]: State[K] }
           >;
-    check: (
+    refine: (
         fn: (value: State['type']) => boolean | Promise<boolean>,
         config?: ForgeMethodConfig
     ) => BaseForgeType<Methods, State>;
-    forge: <T = unknown>(value: T) => Promise<VerificationResult<T>>;
+    craft: <T = unknown>(value: T) => Promise<VerificationResult<T>>;
 } & {
     [MethodName in keyof Methods]: Methods[MethodName] extends (
         ...args: infer FArgs
@@ -122,5 +127,5 @@ export type BaseForgeObject = {
     _type: unknown;
     isOptional: boolean;
     isNullable: boolean;
-    forge: <T = unknown>(value: T) => Promise<VerificationResult<T>>;
+    craft: <T = unknown>(value: T) => Promise<VerificationResult<T>>;
 };
