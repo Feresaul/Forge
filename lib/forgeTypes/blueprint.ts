@@ -3,6 +3,7 @@ import { verifyChainAsync } from '../forgeFunctions';
 import type {
     BaseForgeObject,
     BaseForgeType,
+    ForgeMethodConfig,
     UnsuccessfulVerificationResult
 } from '../types';
 
@@ -14,11 +15,12 @@ export type ObjectValues<T> = {
           : unknown;
 };
 
-export const object = <Model extends Record<string, BaseForgeObject>>(
-    model: Model
+export const blueprint = <Model extends Record<string, BaseForgeObject>>(
+    shape: Model,
+    config?: ForgeMethodConfig
 ): BaseForgeType<
-    { model: Model },
-    { type: ObjectValues<Model>; optional: false; nullable: false; model: null }
+    { shape: Model },
+    { type: ObjectValues<Model>; optional: false; nullable: false; shape: null }
 > => {
     return baseForgeType({
         isOptional: false,
@@ -35,11 +37,12 @@ export const object = <Model extends Record<string, BaseForgeObject>>(
                     }
                     return false;
                 },
-                caller: 'object',
-                errorCode: 'value_error'
+                caller: 'blueprint',
+                errorCode: 'value_error',
+                ...config
             }
         ],
-        methods: () => ({ model }),
+        methods: () => ({ shape }),
         craft:
             (config) =>
             async <T = unknown>(value: T) => {
@@ -52,9 +55,9 @@ export const object = <Model extends Record<string, BaseForgeObject>>(
 
                 let issues: UnsuccessfulVerificationResult[] = [];
 
-                // Verify all properties in the model
+                // Verify all properties in the shape
                 await Promise.all(
-                    Object.entries(model).map(async ([key, forgeElement]) => {
+                    Object.entries(shape).map(async ([key, forgeElement]) => {
                         const res = await forgeElement.craft(
                             value
                                 ? (value as Record<string, unknown>)[key]
@@ -101,7 +104,7 @@ export const object = <Model extends Record<string, BaseForgeObject>>(
                 if (issues.length > 0) {
                     return {
                         success: false,
-                        caller: 'object',
+                        caller: 'blueprint',
                         errorCode: 'validation_error',
                         issues
                     };

@@ -67,7 +67,7 @@ describe('f.number', () => {
     it('should validate using custom check', async () => {
         const schema = f
             .number()
-            .refine((value) => value > 0, { errorMessage: 'Must be positive' });
+            .verify((value) => value > 0, { errorMessage: 'Must be positive' });
         expect((await schema.craft(42)).success).toBe(true);
         expect((await schema.craft(-1)).success).toBe(false);
     });
@@ -75,8 +75,8 @@ describe('f.number', () => {
     it('should support multiple checks in chain', async () => {
         const schema = f
             .number()
-            .refine((value) => value > 0, { errorMessage: 'Must be positive' })
-            .refine((value) => value % 2 === 0, {
+            .verify((value) => value > 0, { errorMessage: 'Must be positive' })
+            .verify((value) => value % 2 === 0, {
                 errorMessage: 'Must be even'
             });
         expect((await schema.craft(2)).success).toBe(true);
@@ -85,7 +85,7 @@ describe('f.number', () => {
     });
 
     it('should validate async check', async () => {
-        const schema = f.number().refine(
+        const schema = f.number().verify(
             async (value) => {
                 await new Promise((resolve) => setTimeout(resolve, 100));
                 return value > 0;

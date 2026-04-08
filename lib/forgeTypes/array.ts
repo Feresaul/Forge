@@ -8,7 +8,8 @@ import type {
 } from '../types';
 
 export const array = <T extends BaseForgeObject>(
-    model: T
+    forgeType: T,
+    config?: ForgeMethodConfig
 ): BaseForgeType<
     {
         minLength: (min: number, config?: ForgeMethodConfig) => unknown;
@@ -29,7 +30,8 @@ export const array = <T extends BaseForgeObject>(
             {
                 fn: (value: unknown) => Array.isArray(value),
                 caller: 'array',
-                errorCode: 'value_error'
+                errorCode: 'value_error',
+                ...config
             }
         ],
         methods: (addToForge) => ({
@@ -66,7 +68,7 @@ export const array = <T extends BaseForgeObject>(
                 if (Array.isArray(values)) {
                     await Promise.all(
                         values.map(async (value, idx) => {
-                            const res = await model.craft(value);
+                            const res = await forgeType.craft(value);
                             if (!res.success) {
                                 // Push the issue with the index of the array
                                 issues.push({ ...res, arrayIndex: idx });

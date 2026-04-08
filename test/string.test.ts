@@ -73,7 +73,7 @@ describe('f.string', () => {
     it('should validate using custom check', async () => {
         const schema = f
             .string()
-            .refine((value) => value === value.toUpperCase(), {
+            .verify((value) => value === value.toUpperCase(), {
                 errorMessage: 'Must be uppercase'
             });
         expect((await schema.craft('VALID')).success).toBe(true);
@@ -83,8 +83,8 @@ describe('f.string', () => {
     it('should support multiple checks in chain', async () => {
         const schema = f
             .string()
-            .refine((value) => value.length > 2, { errorMessage: 'Too short' })
-            .refine((value) => value === value.toUpperCase(), {
+            .verify((value) => value.length > 2, { errorMessage: 'Too short' })
+            .verify((value) => value === value.toUpperCase(), {
                 errorMessage: 'Must be uppercase'
             });
         expect((await schema.craft('AB')).success).toBe(false);
@@ -99,7 +99,7 @@ describe('f.string', () => {
     });
 
     it('should validate async check', async () => {
-        const schema = f.string().refine(
+        const schema = f.string().verify(
             async (value) => {
                 await new Promise((resolve) => setTimeout(resolve, 100));
                 return value === value.toUpperCase();

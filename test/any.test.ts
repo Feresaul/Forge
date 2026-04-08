@@ -11,7 +11,7 @@ describe('any', () => {
     });
 
     it('should support check method', async () => {
-        const schema = f.any().refine((v) => typeof v === 'number');
+        const schema = f.any().verify((v) => typeof v === 'number');
         expect((await schema.craft(42)).success).toBe(true);
         expect((await schema.craft('not a number')).success).toBe(false);
     });

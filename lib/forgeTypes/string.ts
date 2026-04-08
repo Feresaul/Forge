@@ -1,7 +1,9 @@
 import { baseForgeType } from '../baseForgeType';
 import type { BaseForgeType, ForgeMethodConfig } from '../types';
 
-export const string = (): BaseForgeType<
+export const string = (
+    config?: ForgeMethodConfig
+): BaseForgeType<
     {
         regExp: (pattern: RegExp, config?: ForgeMethodConfig) => unknown;
         minLength: (min: number, config?: ForgeMethodConfig) => unknown;
@@ -23,7 +25,8 @@ export const string = (): BaseForgeType<
             {
                 fn: (value: unknown) => typeof value === 'string',
                 caller: 'string',
-                errorCode: 'value_error'
+                errorCode: 'value_error',
+                ...config
             }
         ],
         methods: (addToForge) => ({

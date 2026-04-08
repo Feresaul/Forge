@@ -1,9 +1,20 @@
 import { baseForgeType } from '../baseForgeType';
-import type { BaseForgeType } from '../types';
+import type { BaseForgeType, ForgeMethodConfig } from '../types';
 
-export const boolean = (): BaseForgeType<
-    { _: unknown },
-    { type: boolean; optional: false; nullable: false; _: true }
+export const boolean = (
+    config?: ForgeMethodConfig
+): BaseForgeType<
+    {
+        false: (config?: ForgeMethodConfig) => { true: false };
+        true: (config?: ForgeMethodConfig) => { false: false };
+    },
+    {
+        type: boolean;
+        optional: false;
+        nullable: false;
+        false: false;
+        true: false;
+    }
 > => {
     return baseForgeType({
         isOptional: false,
@@ -12,8 +23,23 @@ export const boolean = (): BaseForgeType<
             {
                 fn: (value: unknown) => typeof value === 'boolean',
                 caller: 'boolean',
-                errorCode: 'value_error'
+                errorCode: 'value_error',
+                ...config
             }
-        ]
+        ],
+        methods: (addToForge) => ({
+            false: (config?: ForgeMethodConfig) =>
+                addToForge({
+                    fn: (value: unknown) => value === false,
+                    caller: 'false',
+                    ...config
+                }),
+            true: (config?: ForgeMethodConfig) =>
+                addToForge({
+                    fn: (value: unknown) => value === true,
+                    caller: 'true',
+                    ...config
+                })
+        })
     });
 };

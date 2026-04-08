@@ -1,21 +1,21 @@
 import { describe, it, expect } from 'vitest';
 import f from '../lib';
 
-describe('f.object', () => {
-    it('should return true for a valid object', async () => {
-        const schema = f.object({ name: f.string(), age: f.number() });
+describe('f.blueprint', () => {
+    it('should return true for a valid blueprint', async () => {
+        const schema = f.blueprint({ name: f.string(), age: f.number() });
         const result = await schema.craft({ name: 'John', age: 30 });
         expect(result.success).toBe(true);
     });
 
-    it('should return true for an empty object if model is empty', async () => {
-        const schema = f.object({});
+    it('should return true for an empty blueprint if model is empty', async () => {
+        const schema = f.blueprint({});
         const result = await schema.craft({});
         expect(result.success).toBe(true);
     });
 
-    it('should return false for an invalid object', async () => {
-        const schema = f.object({ name: f.string(), age: f.number() });
+    it('should return false for an invalid blueprint', async () => {
+        const schema = f.blueprint({ name: f.string(), age: f.number() });
         expect(
             (await schema.craft({ name: 'John', age: 'invalid' })).success
         ).toBe(false);
@@ -26,9 +26,9 @@ describe('f.object', () => {
         expect((await schema.craft([])).success).toBe(false);
     });
 
-    it('should validate nested objects', async () => {
-        const schema = f.object({
-            user: f.object({ name: f.string(), age: f.number() })
+    it('should validate nested blueprints', async () => {
+        const schema = f.blueprint({
+            user: f.blueprint({ name: f.string(), age: f.number() })
         });
         const result = await schema.craft({
             user: { name: 'John', age: 'invalid' }
@@ -39,12 +39,12 @@ describe('f.object', () => {
         }
     });
 
-    it('should validate deeply nested objects', async () => {
-        const schema = f.object({
-            user: f.object({
-                profile: f.object({
+    it('should validate deeply nested blueprints', async () => {
+        const schema = f.blueprint({
+            user: f.blueprint({
+                profile: f.blueprint({
                     name: f.string(),
-                    address: f.object({ city: f.string(), zip: f.number() })
+                    address: f.blueprint({ city: f.string(), zip: f.number() })
                 })
             })
         });
@@ -67,9 +67,9 @@ describe('f.object', () => {
         }
     });
 
-    it('should handle optional objects', async () => {
+    it('should handle optional blueprints', async () => {
         const schema = f
-            .object({ name: f.string(), age: f.number() })
+            .blueprint({ name: f.string(), age: f.number() })
             .optional();
         expect((await schema.craft(undefined)).success).toBe(true);
         expect((await schema.craft(null)).success).toBe(false);
@@ -78,9 +78,9 @@ describe('f.object', () => {
         );
     });
 
-    it('should handle nullable objects', async () => {
+    it('should handle nullable blueprints', async () => {
         const schema = f
-            .object({ name: f.string(), age: f.number() })
+            .blueprint({ name: f.string(), age: f.number() })
             .nullable();
         expect((await schema.craft(null)).success).toBe(true);
         expect((await schema.craft(undefined)).success).toBe(false);
@@ -91,8 +91,8 @@ describe('f.object', () => {
 
     it('should validate using custom check', async () => {
         const schema = f
-            .object({ name: f.string(), age: f.number() })
-            .refine((value) => value.age > 18, {
+            .blueprint({ name: f.string(), age: f.number() })
+            .verify((value) => value.age > 18, {
                 errorMessage: 'Age must be greater than 18'
             });
         expect((await schema.craft({ name: 'John', age: 30 })).success).toBe(
@@ -105,11 +105,11 @@ describe('f.object', () => {
 
     it('should support multiple checks in chain', async () => {
         const schema = f
-            .object({ name: f.string(), age: f.number() })
-            .refine((value) => value.age > 18, {
+            .blueprint({ name: f.string(), age: f.number() })
+            .verify((value) => value.age > 18, {
                 errorMessage: 'Age must be greater than 18'
             })
-            .refine((value) => value.name.length > 2, {
+            .verify((value) => value.name.length > 2, {
                 errorMessage: 'Name too short'
             });
         expect((await schema.craft({ name: 'Jo', age: 30 })).success).toBe(
@@ -120,9 +120,9 @@ describe('f.object', () => {
         );
     });
 
-    it('should handle optional and nullable objects', async () => {
+    it('should handle optional and nullable blueprints', async () => {
         const schema = f
-            .object({ name: f.string(), age: f.number() })
+            .blueprint({ name: f.string(), age: f.number() })
             .optional()
             .nullable();
         expect((await schema.craft(undefined)).success).toBe(true);
@@ -134,21 +134,23 @@ describe('f.object', () => {
     });
 
     it('should validate async check', async () => {
-        const schema = f.object({ name: f.string(), age: f.number() }).refine(
-            async (value) => {
-                await new Promise((resolve) => setTimeout(resolve, 100));
-                return value.age > 18;
-            },
-            { errorMessage: 'Age must be greater than 18' }
-        );
+        const schema = f
+            .blueprint({ name: f.string(), age: f.number() })
+            .verify(
+                async (value) => {
+                    await new Promise((resolve) => setTimeout(resolve, 100));
+                    return value.age > 18;
+                },
+                { errorMessage: 'Age must be greater than 18' }
+            );
         const result = await schema.craft({ name: 'John', age: 30 });
         expect(result.success).toBe(true);
         const invalidResult = await schema.craft({ name: 'John', age: 15 });
         expect(invalidResult.success).toBe(false);
     });
 
-    it('should support objects with various types', async () => {
-        const schema = f.object({
+    it('should support blueprints with various types', async () => {
+        const schema = f.blueprint({
             name: f.string(),
             age: f.number().optional(),
             isActive: f.boolean().nullable(),

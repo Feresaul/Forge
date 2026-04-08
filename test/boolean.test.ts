@@ -40,11 +40,9 @@ describe('f.boolean', () => {
     });
 
     it('should validate using custom check', async () => {
-        const schema = f
-            .boolean()
-            .refine((value) => value === true, {
-                errorMessage: 'Must be true'
-            });
+        const schema = f.boolean().verify((value) => value === true, {
+            errorMessage: 'Must be true'
+        });
         expect((await schema.craft(true)).success).toBe(true);
         expect((await schema.craft(false)).success).toBe(false);
     });
@@ -52,8 +50,8 @@ describe('f.boolean', () => {
     it('should support multiple checks in chain', async () => {
         const schema = f
             .boolean()
-            .refine((value) => value === true, { errorMessage: 'Must be true' })
-            .refine((value) => typeof value === 'boolean', {
+            .verify((value) => value === true, { errorMessage: 'Must be true' })
+            .verify((value) => typeof value === 'boolean', {
                 errorMessage: 'Must be boolean'
             });
         expect((await schema.craft(true)).success).toBe(true);
@@ -61,7 +59,7 @@ describe('f.boolean', () => {
     });
 
     it('should validate async check', async () => {
-        const schema = f.boolean().refine(
+        const schema = f.boolean().verify(
             async (value) => {
                 await new Promise((resolve) => setTimeout(resolve, 100));
                 return value === true;

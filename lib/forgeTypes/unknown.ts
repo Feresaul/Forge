@@ -2,8 +2,8 @@ import { baseForgeType } from '../baseForgeType';
 import type { BaseForgeType } from '../types';
 
 export const unknown = (): BaseForgeType<
-    { _: unknown },
-    { type: unknown; optional: true; nullable: true; _: true }
+    { _: undefined },
+    { type: unknown; optional: true; nullable: true; _: null }
 > => {
     return baseForgeType({
         isOptional: true,

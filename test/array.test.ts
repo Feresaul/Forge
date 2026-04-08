@@ -70,7 +70,7 @@ describe('f.array', () => {
     });
 
     it('should validate using custom check', async () => {
-        const schema = f.array(f.string()).refine((value) => value.length > 0, {
+        const schema = f.array(f.string()).verify((value) => value.length > 0, {
             errorMessage: 'Must have at least one element'
         });
         expect((await schema.craft(['valid'])).success).toBe(true);
@@ -80,8 +80,8 @@ describe('f.array', () => {
     it('should support multiple checks in chain', async () => {
         const schema = f
             .array(f.string())
-            .refine((value) => value.length > 1, { errorMessage: 'Too short' })
-            .refine((value) => value.every((v) => typeof v === 'string'), {
+            .verify((value) => value.length > 1, { errorMessage: 'Too short' })
+            .verify((value) => value.every((v) => typeof v === 'string'), {
                 errorMessage: 'All must be strings'
             });
         expect((await schema.craft(['a'])).success).toBe(false);
@@ -90,7 +90,7 @@ describe('f.array', () => {
     });
 
     it('should validate async check', async () => {
-        const schema = f.array(f.string()).refine(
+        const schema = f.array(f.string()).verify(
             async (value) => {
                 await new Promise((resolve) => setTimeout(resolve, 100));
                 return value.length > 0;

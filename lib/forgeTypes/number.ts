@@ -1,7 +1,9 @@
 import { baseForgeType } from '../baseForgeType';
 import type { BaseForgeType, ForgeMethodConfig } from '../types';
 
-export const number = (): BaseForgeType<
+export const number = (
+    config?: ForgeMethodConfig
+): BaseForgeType<
     {
         lt: (val: number, config?: ForgeMethodConfig) => { lte: false };
         lte: (max: number, config?: ForgeMethodConfig) => { lt: false };
@@ -31,7 +33,8 @@ export const number = (): BaseForgeType<
             {
                 fn: (value: unknown) => typeof value === 'number',
                 caller: 'number',
-                errorCode: 'value_error'
+                errorCode: 'value_error',
+                ...config
             }
         ],
         methods: (addToForge) => ({

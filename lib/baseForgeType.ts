@@ -44,13 +44,13 @@ export const baseForgeType = <
         >({ ...config, isNullable: true });
     };
 
-    const refine = (
+    const verify = (
         fn: (value: State['type']) => boolean | Promise<boolean>,
         config?: ForgeMethodConfig
     ): BaseForgeType<Methods, State> => {
         return addToForge({
             fn: (value: unknown) => fn(value as State['type']),
-            caller: 'refine',
+            caller: 'verify',
             ...config
         });
     };
@@ -64,7 +64,7 @@ export const baseForgeType = <
         isNullable: config.isNullable,
         optional,
         nullable,
-        refine,
+        verify,
         craft: config.craft
             ? config.craft({
                   isOptional: config.isOptional,

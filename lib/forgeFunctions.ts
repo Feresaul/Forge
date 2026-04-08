@@ -58,7 +58,7 @@ export const verifyChainAsync = async <T = unknown>(
         ? { success: true, value }
         : {
               success: false,
-              caller: '',
+              caller: config.queue.at(0)?.caller ?? '',
               errorCode: 'validation_error',
               issues
           };

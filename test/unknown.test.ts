@@ -11,7 +11,7 @@ describe('unknown', () => {
     });
 
     it('should support check method', async () => {
-        const schema = f.unknown().refine((v) => typeof v === 'string');
+        const schema = f.unknown().verify((v) => typeof v === 'string');
         expect((await schema.craft('hello')).success).toBe(true);
         expect((await schema.craft(123)).success).toBe(false);
     });
