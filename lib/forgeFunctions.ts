@@ -10,10 +10,10 @@ import type {
  * @param options - Options for the verification process.
  * @returns A Promise that resolves to a VerificationResult indicating the outcome of the verification.
  */
-export const verifyChainAsync = async <T = unknown>(
-    value: T,
+export const verifyChainAsync = async <TType>(
+    value: unknown,
     config: BaseForgeConfig
-): Promise<VerificationResult<T>> => {
+): Promise<VerificationResult<TType>> => {
     let lastMethodName = '';
     const issues: UnsuccessfulVerificationResult[] = [];
 
@@ -55,7 +55,10 @@ export const verifyChainAsync = async <T = unknown>(
     }
 
     return issues.length === 0
-        ? { success: true, value }
+        ? ({
+              success: true,
+              value: value as TType
+          } as VerificationResult<TType>)
         : {
               success: false,
               caller: config.queue.at(0)?.caller ?? '',

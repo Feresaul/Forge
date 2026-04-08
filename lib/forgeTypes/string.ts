@@ -4,13 +4,13 @@ import type { BaseForgeType, ForgeMethodConfig } from '../types';
 export const string = (
     config?: ForgeMethodConfig
 ): BaseForgeType<
+    string,
     {
         regExp: (pattern: RegExp, config?: ForgeMethodConfig) => unknown;
         minLength: (min: number, config?: ForgeMethodConfig) => unknown;
         maxLength: (max: number, config?: ForgeMethodConfig) => unknown;
     },
     {
-        type: string;
         optional: false;
         nullable: false;
         minLength: false;

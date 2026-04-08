@@ -4,12 +4,12 @@ import type { BaseForgeType, ForgeMethodConfig } from '../types';
 export const boolean = (
     config?: ForgeMethodConfig
 ): BaseForgeType<
+    boolean,
     {
         false: (config?: ForgeMethodConfig) => { true: false };
         true: (config?: ForgeMethodConfig) => { false: false };
     },
     {
-        type: boolean;
         optional: false;
         nullable: false;
         false: false;

@@ -3,27 +3,34 @@ import { verifyChainAsync } from '../forgeFunctions';
 import type {
     BaseForgeObject,
     BaseForgeType,
-    UnsuccessfulVerificationResult
+    UnsuccessfulVerificationResult,
+    VerificationResult
 } from '../types';
 
 export const or = <T extends BaseForgeObject[]>(
     forgeTypes: T
 ): BaseForgeType<
+    T[number]['_type'],
     { _: undefined },
-    { type: T[number]['_type']; optional: false; nullable: false; _: null }
+    {
+        optional: false;
+        nullable: false;
+        _: null;
+    }
 > => {
+    type TType = T[number]['_type'];
     return baseForgeType({
         isOptional: false,
         isNullable: false,
         queue: [],
         craft:
             (config) =>
-            async <T = unknown>(value: T) => {
+            async (value: unknown): Promise<VerificationResult<TType>> => {
                 if (
                     (config.isOptional && value === undefined) ||
                     (config.isNullable && value === null)
                 ) {
-                    return { success: true, value };
+                    return { success: true, value: value as TType };
                 }
 
                 let hasAtLeastOneValid = false;
@@ -59,7 +66,7 @@ export const or = <T extends BaseForgeObject[]>(
                         issues
                     };
                 }
-                return { success: true, value };
+                return { success: true, value: value as TType };
             }
     });
 };

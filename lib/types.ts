@@ -16,9 +16,9 @@ export type ForgeMethod = ForgeMethodConfig & {
     errorCode?: ErrorCode;
 };
 
-export type SuccessfulVerificationResult<T = unknown> = {
+export type SuccessfulVerificationResult<TType> = {
     success: true;
-    value: T;
+    value: TType;
 };
 
 export type UnsuccessfulVerificationResult = {
@@ -31,14 +31,13 @@ export type UnsuccessfulVerificationResult = {
     arrayIndex?: number;
 };
 
-export type VerificationResult<T = unknown> =
-    | SuccessfulVerificationResult<T>
+export type VerificationResult<TType> =
+    | SuccessfulVerificationResult<TType>
     | UnsuccessfulVerificationResult;
 
 export type UnknownObject = Record<string, unknown>;
 
 export type ForgeState<Methods extends UnknownObject> = {
-    type: unknown;
     optional: boolean;
     nullable: boolean;
 } & {
@@ -51,15 +50,18 @@ export type BaseForgeConfig = {
     queue: ForgeMethod[];
 };
 
-export type BaseForgeTypeConfig<Methods extends UnknownObject> =
-    BaseForgeConfig & {
-        methods?: (addToForge: (method: ForgeMethod) => unknown) => Methods;
-        craft?: (
-            config: BaseForgeConfig
-        ) => <T = unknown>(value: T) => Promise<VerificationResult<unknown>>;
-    };
+export type BaseForgeTypeConfig<
+    TType,
+    Methods extends UnknownObject
+> = BaseForgeConfig & {
+    methods?: (addToForge: (method: ForgeMethod) => unknown) => Methods;
+    craft?: (
+        config: BaseForgeConfig
+    ) => (value: unknown) => Promise<VerificationResult<TType>>;
+};
 
 export type BaseForgeType<
+    TType,
     Methods extends UnknownObject,
     State extends ForgeState<Methods>
 > = {
@@ -67,7 +69,7 @@ export type BaseForgeType<
      * The current type of the schema. It is updated when a method that changes the type is called (e.g. optional, nullable, etc.).
      * It is used to infer the type of the value when crafting and refining.
      */
-    _type: State['type'];
+    _type: TType;
     /**
      * Indicates if the schema is optional. It is updated when the optional method is called. It is used to infer the type of the value when crafting and refining.
      */
@@ -82,9 +84,9 @@ export type BaseForgeType<
     optional: State['optional'] extends true
         ? never
         : () => BaseForgeType<
+              TType | undefined,
               Methods,
               {
-                  type: State['type'] | undefined;
                   optional: true;
                   nullable: State['nullable'];
               } & { [K in keyof Methods]: State[K] }
@@ -95,9 +97,9 @@ export type BaseForgeType<
     nullable: State['nullable'] extends true
         ? never
         : () => BaseForgeType<
+              TType | null,
               Methods,
               {
-                  type: State['type'] | null;
                   optional: State['optional'];
                   nullable: true;
               } & { [K in keyof Methods]: State[K] }
@@ -112,9 +114,9 @@ export type BaseForgeType<
      * @returns A new schema with the validation function added.
      */
     verify: (
-        fn: (value: State['type']) => boolean | Promise<boolean>,
+        fn: (value: TType) => boolean | Promise<boolean>,
         config?: ForgeMethodConfig
-    ) => BaseForgeType<Methods, State>;
+    ) => BaseForgeType<TType, Methods, State>;
     /**
      * Crafts a value by validating it against the schema. It returns a promise that resolves to a verification result, which can be either successful or unsuccessful.
      * The type of the value is inferred from the current state of the schema.
@@ -122,21 +124,21 @@ export type BaseForgeType<
      * @returns A promise that resolves to a verification result, which can be either successful or unsuccessful.
      * The type of the value in the successful result is inferred from the current state of the schema.
      */
-    craft: <T = unknown>(value: T) => Promise<VerificationResult<T>>;
+    craft: (value: unknown) => Promise<VerificationResult<TType>>;
 } & {
     [MethodName in keyof Methods]: Methods[MethodName] extends (
         ...args: infer FArgs
     ) => unknown
         ? // If state is null function can be used multiple times
           State[MethodName] extends null
-            ? (...args: FArgs) => BaseForgeType<Methods, State>
+            ? (...args: FArgs) => BaseForgeType<TType, Methods, State>
             : // If state is not null, function can only be used once
               State[MethodName] extends true
               ? never
               : (...args: FArgs) => BaseForgeType<
+                    TType,
                     Methods,
                     {
-                        type: State['type'];
                         optional: State['optional'];
                         nullable: State['nullable'];
                     } & {
@@ -154,9 +156,9 @@ export type BaseForgeType<
         : Methods[MethodName];
 };
 
-export type BaseForgeObject = {
-    _type: unknown;
+export type BaseForgeObject<TType = unknown> = {
+    _type: TType;
     isOptional: boolean;
     isNullable: boolean;
-    craft: <T = unknown>(value: T) => Promise<VerificationResult<T>>;
+    craft: (value: unknown) => Promise<VerificationResult<TType>>;
 };

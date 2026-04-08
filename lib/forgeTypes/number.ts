@@ -4,6 +4,7 @@ import type { BaseForgeType, ForgeMethodConfig } from '../types';
 export const number = (
     config?: ForgeMethodConfig
 ): BaseForgeType<
+    number,
     {
         lt: (val: number, config?: ForgeMethodConfig) => { lte: false };
         lte: (max: number, config?: ForgeMethodConfig) => { lt: false };
@@ -14,7 +15,6 @@ export const number = (
         integer: (config?: ForgeMethodConfig) => unknown;
     },
     {
-        type: number;
         optional: false;
         nullable: false;
         lt: false;

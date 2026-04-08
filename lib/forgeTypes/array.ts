@@ -4,25 +4,27 @@ import type {
     BaseForgeObject,
     BaseForgeType,
     ForgeMethodConfig,
-    UnsuccessfulVerificationResult
+    UnsuccessfulVerificationResult,
+    VerificationResult
 } from '../types';
 
 export const array = <T extends BaseForgeObject>(
     forgeType: T,
     config?: ForgeMethodConfig
 ): BaseForgeType<
+    Array<T['_type']>,
     {
         minLength: (min: number, config?: ForgeMethodConfig) => unknown;
         maxLength: (max: number, config?: ForgeMethodConfig) => unknown;
     },
     {
-        type: Array<T['_type']>;
         optional: false;
         nullable: false;
         minLength: false;
         maxLength: false;
     }
 > => {
+    type TType = Array<T['_type']>;
     return baseForgeType({
         isOptional: false,
         isNullable: false,
@@ -54,12 +56,15 @@ export const array = <T extends BaseForgeObject>(
         }),
         craft:
             (config) =>
-            async <T = unknown>(values: T) => {
+            async (values: unknown): Promise<VerificationResult<TType>> => {
                 if (
                     (config.isOptional && values === undefined) ||
                     (config.isNullable && values === null)
                 ) {
-                    return { success: true, value: values };
+                    return {
+                        success: true,
+                        value: values as unknown as TType
+                    };
                 }
 
                 let issues: UnsuccessfulVerificationResult[] = [];
@@ -91,7 +96,7 @@ export const array = <T extends BaseForgeObject>(
                         issues
                     };
                 }
-                return { success: true, value: values };
+                return { success: true, value: values as TType };
             }
     });
 };

@@ -3,8 +3,13 @@ import { baseForgeType } from '../baseForgeType';
 import type { BaseForgeType } from '../types';
 
 export const any = (): BaseForgeType<
+    any,
     { _: undefined },
-    { type: any; optional: true; nullable: true; _: null }
+    {
+        optional: true;
+        nullable: true;
+        _: null;
+    }
 > => {
     return baseForgeType({
         isOptional: true,

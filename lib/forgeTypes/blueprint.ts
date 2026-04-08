@@ -4,24 +4,24 @@ import type {
     BaseForgeObject,
     BaseForgeType,
     ForgeMethodConfig,
-    UnsuccessfulVerificationResult
+    UnknownObject,
+    UnsuccessfulVerificationResult,
+    VerificationResult
 } from '../types';
 
-export type ObjectValues<T> = {
-    [K in keyof T]: T[K] extends { model: infer M }
-        ? ObjectValues<M>
-        : T[K] extends { _type: infer FType }
-          ? FType
-          : unknown;
-};
-
-export const blueprint = <Model extends Record<string, BaseForgeObject>>(
-    shape: Model,
+export const blueprint = <FShape extends Record<string, BaseForgeObject>>(
+    shape: FShape,
     config?: ForgeMethodConfig
 ): BaseForgeType<
-    { shape: Model },
-    { type: ObjectValues<Model>; optional: false; nullable: false; shape: null }
+    { [K in keyof FShape]: FShape[K]['_type'] },
+    { shape: FShape },
+    {
+        optional: false;
+        nullable: false;
+        shape: null;
+    }
 > => {
+    type TType = { [K in keyof FShape]: FShape[K]['_type'] };
     return baseForgeType({
         isOptional: false,
         isNullable: false,
@@ -45,12 +45,15 @@ export const blueprint = <Model extends Record<string, BaseForgeObject>>(
         methods: () => ({ shape }),
         craft:
             (config) =>
-            async <T = unknown>(value: T) => {
+            async (value: unknown): Promise<VerificationResult<TType>> => {
                 if (
                     (config.isOptional && value === undefined) ||
                     (config.isNullable && value === null)
                 ) {
-                    return { success: true, value };
+                    return {
+                        success: true,
+                        value: value as unknown as TType
+                    };
                 }
 
                 let issues: UnsuccessfulVerificationResult[] = [];
@@ -59,9 +62,7 @@ export const blueprint = <Model extends Record<string, BaseForgeObject>>(
                 await Promise.all(
                     Object.entries(shape).map(async ([key, forgeElement]) => {
                         const res = await forgeElement.craft(
-                            value
-                                ? (value as Record<string, unknown>)[key]
-                                : undefined
+                            value ? (value as UnknownObject)[key] : undefined
                         );
                         if (res.success) {
                             return;
@@ -109,7 +110,7 @@ export const blueprint = <Model extends Record<string, BaseForgeObject>>(
                         issues
                     };
                 }
-                return { success: true, value };
+                return { success: true, value: value as TType };
             }
     });
 };
